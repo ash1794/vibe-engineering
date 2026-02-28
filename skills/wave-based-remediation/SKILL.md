@@ -1,10 +1,10 @@
 ---
-name: vibe-wavibe-based-remediation
+name: vibe-wave-based-remediation
 description: Systematically fix large backlogs of issues using prioritized waves. Use when facing 10+ issues, bugs, or gaps to address.
 user-invocable: true
 ---
 
-# vibe-wavibe-based-remediation
+# vibe-wave-based-remediation
 
 When you have 50 issues, don't fix them randomly. Attack in waves.
 

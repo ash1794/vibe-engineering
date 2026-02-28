@@ -32,7 +32,7 @@ Ask the user what they're trying to do, then recommend skills based on their ans
 
 ### "I need to fix bugs / issues"
 → If 1-3 bugs: `vibe-debugging-journal` (after fixing)
-→ If 10+ bugs: `vibe-wavibe-based-remediation`
+→ If 10+ bugs: `vibe-wave-based-remediation`
 → Always: `vibe-adversarial-test-generation` (prevent recurrence)
 
 ### "I'm reviewing code or docs"

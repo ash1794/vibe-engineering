@@ -1,0 +1,26 @@
+{
+  "name": "vibe-engineering",
+  "description": "34 engineering discipline skills for Claude Code — research, quality gates, testing patterns, deployment, learning, and more. Extracted from real-world development.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ashwin K",
+    "email": "ash1794@gmail.com"
+  },
+  "homepage": "https://github.com/ash1794/vibe-engineering",
+  "repository": "https://github.com/ash1794/vibe-engineering",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "engineering",
+    "quality",
+    "testing",
+    "debugging",
+    "deployment",
+    "tdd",
+    "code-review",
+    "best-practices",
+    "workflows",
+    "vibe-coding",
+    "discipline"
+  ]
+}

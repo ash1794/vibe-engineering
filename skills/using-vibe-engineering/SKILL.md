@@ -49,7 +49,7 @@ Before taking any action, check if a vibe-engineering skill applies. Skills use 
 ### Scaling Work
 - `vibe-parallel-task-decomposition` — DAG analysis for parallelism
 - `vibe-cherry-pick-integration` — Safe parallel branch integration
-- `vibe-wavibe-based-remediation` — Prioritized batch fixes
+- `vibe-wave-based-remediation` — Prioritized batch fixes
 - `vibe-async-task-queue` — Cross-session task persistence
 
 ### Planning & Requirements
