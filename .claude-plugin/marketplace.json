@@ -1,7 +1,8 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "vibe-engineering",
-  "description": "Engineering discipline skills for Claude Code — 34 skills for research, quality, testing, deployment, and more",
+  "metadata": {
+    "description": "Engineering discipline skills for Claude Code — 34 skills for research, quality, testing, deployment, and more"
+  },
   "owner": {
     "name": "Ashwin K",
     "email": "ash1794@gmail.com"
@@ -15,7 +16,10 @@
         "name": "Ashwin K",
         "email": "ash1794@gmail.com"
       },
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "ash1794/vibe-engineering"
+      },
       "category": "development",
       "homepage": "https://github.com/ash1794/vibe-engineering"
     }
