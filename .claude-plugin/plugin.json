@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
-  "description": "34 engineering discipline skills for Claude Code — research, quality gates, testing patterns, deployment, learning, and more. Extracted from real-world development.",
-  "version": "1.0.0",
+  "description": "36 engineering discipline skills for Claude Code — research, quality gates, testing patterns, deployment, learning, gap analysis, and more. Extracted from real-world development.",
+  "version": "1.1.0",
   "author": {
     "name": "Ashwin K",
     "email": "ash1794@gmail.com"

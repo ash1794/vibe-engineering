@@ -1,12 +1,12 @@
 # vibe-engineering
 
-A Claude Code plugin with 34 engineering discipline skills. Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development.
+A Claude Code plugin with 36 engineering discipline skills. Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development.
 
 > "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain.
 
 ## What is this?
 
-A Claude Code plugin with 34 skills that enforce engineering discipline across any project:
+A Claude Code plugin with 36 skills that enforce engineering discipline across any project:
 
 - **Research & Decision-Making** (4 skills) — Think before building
 - **Quality Gates & Validation** (6 skills) — Catch issues before they ship
@@ -14,6 +14,7 @@ A Claude Code plugin with 34 skills that enforce engineering discipline across a
 - **Parallel & Multi-Agent Development** (4 skills) — Scale your work safely
 - **Testing Patterns** (5 skills) — Test what matters, not just what's easy
 - **Deployment & Operations** (4 skills) — Ship with confidence
+- **Gap Analysis & Remediation** (2 skills) — Audit and systematically close gaps
 - **Communication & Process** (4 skills) — Stay focused, stay clear
 - **Meta Skills** (2 skills) — Skill discovery and routing
 
@@ -25,7 +26,7 @@ A Claude Code plugin with 34 skills that enforce engineering discipline across a
 claude plugin add github:ash1794/vibe-engineering
 ```
 
-That's it. All 34 skills are now available in every Claude Code session.
+That's it. All 36 skills are now available in every Claude Code session.
 
 ### Option 2: Development / local testing
 
@@ -122,6 +123,12 @@ Invoke any skill directly:
 | `vibe-service-health-dashboard` | Checking running services | Multi-service health monitoring |
 | `vibe-rollback-plan` | Before risky changes | Documented rollback runbook |
 
+### Gap Analysis & Remediation
+| Skill | Trigger | Purpose |
+|-------|---------|---------|
+| `vibe-gap-analysis` | Before production launch or after major refactor | 17-dimension production readiness audit with parallel agents |
+| `vibe-gap-closure-loop` | After gap analysis with 10+ findings | Autonomous loop: dependency analysis → parallel fix agents → test gate → repeat |
+
 ### Communication & Process
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
@@ -140,16 +147,18 @@ Invoke any skill directly:
 
 ## How It Works
 
-This is a standard Claude Code plugin. The `.claude-plugin/plugin.json` manifest registers it, and the `skills/` directory contains 34 skill definitions that Claude auto-discovers based on task context.
+This is a standard Claude Code plugin. The `.claude-plugin/plugin.json` manifest registers it, and the `skills/` directory contains 36 skill definitions that Claude auto-discovers based on task context.
 
 ```
 vibe-engineering/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
-├── skills/                  # 34 skill definitions
+├── skills/                  # 36 skill definitions
 │   ├── vibe-help/SKILL.md
 │   ├── quality-loop/SKILL.md
 │   ├── research-before-design/SKILL.md
+│   ├── gap-analysis/SKILL.md
+│   ├── gap-closure-loop/SKILL.md
 │   └── ... (31 more)
 └── README.md
 ```
