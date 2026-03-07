@@ -2,9 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/ash1794/vibe-engineering)
-[![Skills](https://img.shields.io/badge/Skills-37-green)](https://github.com/ash1794/vibe-engineering)
+[![Skills](https://img.shields.io/badge/Skills-38-green)](https://github.com/ash1794/vibe-engineering)
 
-**37 engineering discipline skills for Claude Code.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
+**38 engineering discipline skills for Claude Code + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
 
 > "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain.
 
@@ -18,10 +18,10 @@ Claude automatically discovers and applies the right skill for every task — re
 
 ## What is this?
 
-A Claude Code plugin with 37 skills that enforce engineering discipline across any project:
+A Claude Code plugin with 38 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
 
 - **Research & Decision-Making** (5 skills) — Think before building
-- **Quality Gates & Validation** (6 skills) — Catch issues before they ship
+- **Quality Gates & Validation** (7 skills) — Catch issues before they ship
 - **Learning & Knowledge Management** (5 skills) — Never solve the same problem twice
 - **Parallel & Multi-Agent Development** (4 skills) — Scale your work safely
 - **Testing Patterns** (5 skills) — Test what matters, not just what's easy
@@ -38,7 +38,7 @@ A Claude Code plugin with 37 skills that enforce engineering discipline across a
 claude plugin add github:ash1794/vibe-engineering
 ```
 
-That's it. All 37 skills are now available in every Claude Code session.
+That's it. All 38 skills are now available in every Claude Code session.
 
 ### Option 2: Development / local testing
 
@@ -75,6 +75,116 @@ Invoke any skill directly:
 /vibe-engineering:vibe-reflect-and-compound
 ```
 
+## CLI: `vibe-cli`
+
+The `vibe-cli` CLI wraps critical skills into CI/CD-friendly commands with proper exit codes and JSON output. No dependencies — pure bash.
+
+### Setup
+
+```bash
+# Make it available system-wide (optional)
+ln -s $(pwd)/scripts/vibe-cli /usr/local/bin/vibe-cli
+
+# Or run directly from the repo
+./scripts/vibe-cli help
+```
+
+### Commands
+
+```bash
+vibe-cli pre-commit          # Scan staged changes for secrets, debug code, disabled tests
+vibe-cli coverage            # Run test coverage and report against tier targets
+vibe-cli spec-drift          # Detect spec-code drift from staged changes
+vibe-cli decisions           # Extract decisions from staged diff
+vibe-cli validate            # Validate skill files and manifests
+vibe-cli hook install        # Install as git pre-commit hook
+vibe-cli hook uninstall      # Remove git pre-commit hook
+```
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | All checks passed |
+| `1` | Blocking issues (CI should fail) |
+| `2` | Warnings only (non-blocking) |
+
+### JSON Output
+
+Every command supports `--json` for machine-readable output:
+
+```bash
+vibe-cli pre-commit --json
+# {"status":"fail","blockers":1,"warnings":3,"findings":[...]}
+
+vibe-cli coverage --json --spec docs/spec.md
+# {"status":"pass","tool":"pytest","line_coverage":85,"spec_to_test":{"total":12,"covered":8}}
+
+vibe-cli spec-drift --json --spec docs/spec.md
+# {"status":"drift_detected","drift_items":3,"spec":"docs/spec.md","items":[...]}
+
+vibe-cli decisions --json
+# {"status":"decisions_found","count":4,"files_changed":7,"decisions":[...]}
+```
+
+### CI/CD Integration
+
+**GitHub Actions:**
+```yaml
+- name: Vibe pre-commit check
+  run: ./scripts/vibe-cli pre-commit --json
+
+- name: Coverage check
+  run: ./scripts/vibe-cli coverage --spec docs/spec.md
+```
+
+**GitLab CI:**
+```yaml
+vibe-checks:
+  script:
+    - ./scripts/vibe-cli pre-commit
+    - ./scripts/vibe-cli coverage --spec docs/spec.md
+```
+
+**Pre-commit hook (automatic):**
+```bash
+# Install once — blocks commits with secrets, debug code, etc.
+./scripts/vibe-cli hook install
+```
+
+### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `VIBE_OUTPUT=json` | Same as `--json` |
+| `VIBE_SPEC=<path>` | Default spec path for spec-drift/coverage |
+| `VIBE_TEST_DIR=<path>` | Default test directory |
+| `NO_COLOR=1` | Disable colored output |
+
+## The Spec-Code-Test Loop
+
+Four skills form a connected workflow that keeps spec, tests, and code in sync:
+
+```
+Code changes
+    ↓
+vibe-decision-journal ──→ Extract decisions from diffs
+    ↓
+vibe-spec-sync ──→ Update spec to reflect approved decisions
+    ↓
+vibe-adversarial-test-generation ──→ Generate spec-driven tests with req:ID traceability
+    ↓
+vibe-coverage-enforcer ──→ Verify 3 dimensions (line + spec-to-test + spec-to-code)
+    ↓
+vibe-spec-vs-code-audit ──→ Final verification: no remaining gaps
+```
+
+The CLI exposes the critical parts for automation:
+- `vibe decisions` → extract decisions from staged changes
+- `vibe spec-drift` → detect spec-code drift
+- `vibe coverage` → verify all coverage dimensions
+- `vibe pre-commit` → block commits with secrets/debug code
+
 ## Skill Catalog
 
 ### Meta Skills
@@ -87,7 +197,7 @@ Invoke any skill directly:
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
 | `vibe-research-before-design` | Before any new feature/architecture | SOTA research before design proposals |
-| `vibe-decision-journal` | After any architectural choice | ADR-style persistent decision logging |
+| `vibe-decision-journal` | After any architectural choice or before committing | Automatic decision extraction from diffs + manual ADR recording |
 | `vibe-devil-advocate-review` | Before shipping recommendations | 5-dimension adversarial challenge |
 | `vibe-start-informed` | Before proposing any feature/architecture | Research real projects and failures before designing |
 | `vibe-anti-rationalization-check` | When about to skip a step | Catches shortcut rationalization patterns |
@@ -98,9 +208,10 @@ Invoke any skill directly:
 | `vibe-acceptance-gate` | After completing a task with criteria | PASS/FAIL validation against criteria |
 | `vibe-quality-loop` | After any non-trivial implementation | Implement→Review→Test→Fix→Loop cycle |
 | `vibe-spec-vs-code-audit` | When implementation claimed complete | Line-by-line spec compliance check |
+| `vibe-spec-sync` | Before committing or after approving decisions | Bidirectional spec-code sync with drift detection |
 | `vibe-doc-quality-gate` | After editing any technical doc | Fast 6-point document quality check |
 | `vibe-requirements-validator` | When reviewing PRD/user stories | SMART criteria validation |
-| `vibe-coverage-enforcer` | Before claiming code complete | Tiered coverage standard enforcement |
+| `vibe-coverage-enforcer` | Before claiming code complete | 3-dimension coverage: line + spec-to-test + spec-to-code |
 
 ### Learning & Knowledge Management
 | Skill | Trigger | Purpose |
@@ -125,7 +236,7 @@ Invoke any skill directly:
 | `vibe-golden-file-testing` | Snapshot/golden test implementation | Temporal normalization, update commands |
 | `vibe-scenario-matrix` | Planning test coverage | Behavioral scenario acceptance matrix |
 | `vibe-concurrent-test-safety` | Tests with shared mutable state | Race condition and cleanup auditing |
-| `vibe-adversarial-test-generation` | After happy-path tests written | Edge case and failure mode generation |
+| `vibe-adversarial-test-generation` | After happy-path tests written | Edge case + spec-driven test generation with req:ID traceability |
 | `vibe-fuzz-parser-inputs` | Implementing any parser | Fuzz test scaffolding and corpus |
 
 ### Deployment & Operations
@@ -158,8 +269,9 @@ Without discipline skills, AI coding assistants make the same mistakes humans do
 |---------|----------------------|
 | "Let me just build it" | Research existing solutions first (`vibe-research-before-design`) |
 | "Tests pass, ship it" | Check coverage standards are met (`vibe-coverage-enforcer`) |
-| "I'll remember the decision" | Record it for future sessions (`vibe-decision-journal`) |
+| "I'll remember the decision" | Extract it automatically from diffs (`vibe-decision-journal`) |
 | "Good enough" | Loop until clean (`vibe-quality-loop`) |
+| "Spec is probably still accurate" | Detect drift and sync back (`vibe-spec-sync`) |
 | "This is simple, no need for..." | Catch rationalization in real-time (`vibe-anti-rationalization-check`) |
 | Debug by guessing | Systematic root cause analysis (`vibe-debugging-journal`) |
 | Context lost between sessions | Auto-generated handover docs (`vibe-handover-doc`) |
@@ -169,24 +281,27 @@ Without discipline skills, AI coding assistants make the same mistakes humans do
 1. **Born from pain, not theory** — Every skill exists because skipping it caused real problems
 2. **When to use AND when NOT to use** — Every skill has explicit triggers and anti-triggers
 3. **Composable** — Skills work independently or together
-4. **Non-invasive** — Skills guide, they don't block. WARN, don't FAIL (unless critical)
+4. **Advisory first, enforcement when it matters** — Skills guide; CLI enforces in CI/CD
 5. **Cross-project** — No project-specific assumptions. Works with any language/framework
 
 ## How It Works
 
-This is a standard Claude Code plugin. The `.claude-plugin/plugin.json` manifest registers it, and the `skills/` directory contains 37 skill definitions that Claude auto-discovers based on task context.
+This is a standard Claude Code plugin. The `.claude-plugin/plugin.json` manifest registers it, and the `skills/` directory contains 38 skill definitions that Claude auto-discovers based on task context.
 
 ```
 vibe-engineering/
 ├── .claude-plugin/
 │   └── plugin.json          # Plugin manifest
-├── skills/                  # 37 skill definitions
+├── skills/                  # 38 skill definitions
 │   ├── vibe-help/SKILL.md
 │   ├── quality-loop/SKILL.md
-│   ├── research-before-design/SKILL.md
+│   ├── spec-sync/SKILL.md
+│   ├── decision-journal/SKILL.md
 │   ├── gap-analysis/SKILL.md
-│   ├── gap-closure-loop/SKILL.md
-│   └── ... (32 more)
+│   └── ... (33 more)
+├── scripts/
+│   ├── vibe-cli           # CLI for CI/CD enforcement
+│   └── validate-skills.sh # Skill file validator
 └── README.md
 ```
 
@@ -242,7 +357,7 @@ These skills were extracted from building [nosaintsville-agent](https://github.c
 
 **The numbers:**
 - 50+ session observations analyzed (310k+ tokens of development history)
-- 15 project-specific skills generalized into 37 universal patterns
+- 15 project-specific skills generalized into 38 universal patterns
 - 3 weeks of intensive multi-agent development
 - Every skill represents a pattern that emerged from real pain — not a theoretical best practice document
 

@@ -1,0 +1,586 @@
+#!/usr/bin/env bash
+# vibe-cli — CLI for vibe-engineering critical paths
+# Wraps skills into CI/CD-friendly commands with exit codes and JSON output.
+#
+# Usage: vibe-cli <command> [options]
+# Run `vibe-cli help` for full command list.
+
+set -euo pipefail
+
+VERSION="1.4.0"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Colors (disabled when not a TTY or NO_COLOR is set)
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+  BLUE='\033[0;34m'; BOLD='\033[1m'; RESET='\033[0m'
+else
+  RED=''; GREEN=''; YELLOW=''; BLUE=''; BOLD=''; RESET=''
+fi
+
+# Output format: text (default) or json
+OUTPUT="${VIBE_OUTPUT:-text}"
+
+die()  { echo -e "${RED}error:${RESET} $1" >&2; exit 1; }
+info() { [[ "$OUTPUT" == "text" ]] && echo -e "${BLUE}>>>${RESET} $1"; }
+pass() { [[ "$OUTPUT" == "text" ]] && echo -e "${GREEN}PASS${RESET} $1"; }
+fail() { [[ "$OUTPUT" == "text" ]] && echo -e "${RED}FAIL${RESET} $1"; }
+warn() { [[ "$OUTPUT" == "text" ]] && echo -e "${YELLOW}WARN${RESET} $1"; }
+
+# ── help ──────────────────────────────────────────────────────────
+
+cmd_help() {
+  cat <<EOF
+${BOLD}vibe-cli${RESET} v${VERSION} — engineering discipline CLI
+
+${BOLD}COMMANDS${RESET}
+  vibe-cli pre-commit          Scan staged changes for secrets, debug code, TODOs
+  vibe-cli coverage            Run test coverage and report against tier targets
+  vibe-cli spec-drift          Detect spec-code drift from staged changes
+  vibe-cli decisions           Extract decisions from staged diff
+  vibe-cli validate            Validate skill files and manifests
+  vibe-cli hook install        Install as git pre-commit hook
+  vibe-cli hook uninstall      Remove git pre-commit hook
+
+${BOLD}OPTIONS${RESET}
+  --json                   Output in JSON format (for CI/CD parsing)
+  --spec <path>            Path to spec document (for spec-drift, coverage)
+  --test-dir <path>        Path to test directory (for coverage)
+  --help, -h               Show this help
+
+${BOLD}EXIT CODES${RESET}
+  0    All checks passed
+  1    Checks failed (blocking issues found)
+  2    Warnings only (non-blocking issues found)
+
+${BOLD}ENVIRONMENT${RESET}
+  VIBE_OUTPUT=json         Same as --json
+  VIBE_SPEC=<path>         Default spec path
+  VIBE_TEST_DIR=<path>     Default test directory
+  NO_COLOR=1               Disable colored output
+
+${BOLD}CI/CD EXAMPLES${RESET}
+  # GitHub Actions
+  - run: ./scripts/vibe-cli pre-commit --json
+
+  # GitLab CI
+  script:
+    - ./scripts/vibe-cli coverage --spec docs/spec.md --json
+
+  # Pre-commit hook
+  ./scripts/vibe-cli hook install
+EOF
+}
+
+# ── pre-commit ────────────────────────────────────────────────────
+
+cmd_pre_commit() {
+  info "Scanning staged changes..."
+
+  local staged
+  staged=$(git diff --cached --name-only 2>/dev/null) || die "Not in a git repository"
+
+  if [[ -z "$staged" ]]; then
+    pass "No staged changes"
+    [[ "$OUTPUT" == "json" ]] && echo '{"status":"pass","findings":[]}'
+    exit 0
+  fi
+
+  local diff
+  diff=$(git diff --cached)
+  local findings=()
+  local blockers=0
+  local warnings=0
+
+  # Secrets detection
+  local secret_patterns=(
+    'API_KEY\s*=\s*["\x27][^"\x27]+'
+    'SECRET\s*=\s*["\x27][^"\x27]+'
+    'PASSWORD\s*=\s*["\x27][^"\x27]+'
+    'AKIA[0-9A-Z]{16}'
+    'BEGIN (RSA |DSA |EC |OPENSSH )?PRIVATE KEY'
+    'mongodb(\+srv)?://[^"\x27\s]+'
+    'postgres(ql)?://[^"\x27\s]+'
+    'mysql://[^"\x27\s]+'
+  )
+
+  for pattern in "${secret_patterns[@]}"; do
+    local matches
+    matches=$(echo "$diff" | grep -cPi "$pattern" 2>/dev/null || true)
+    if [[ "$matches" -gt 0 ]]; then
+      findings+=("{\"type\":\"secret\",\"severity\":\"blocker\",\"pattern\":\"$pattern\",\"count\":$matches}")
+      blockers=$((blockers + matches))
+      fail "Possible secret: $pattern ($matches occurrences)"
+    fi
+  done
+
+  # .env files staged
+  if echo "$staged" | grep -qE '\.env($|\.)'; then
+    findings+=("{\"type\":\"secret\",\"severity\":\"blocker\",\"pattern\":\".env file staged\",\"count\":1}")
+    blockers=$((blockers + 1))
+    fail ".env file is staged"
+  fi
+
+  # Debug statements
+  local debug_patterns=(
+    'console\.log\('
+    'fmt\.Println\('
+    'print(\s*\(|$)'
+    'debugger;'
+    'binding\.pry'
+    'import\s+pdb'
+  )
+
+  for pattern in "${debug_patterns[@]}"; do
+    local matches
+    matches=$(echo "$diff" | grep -c "^+" | head -1 || true)
+    local added_matches
+    added_matches=$(echo "$diff" | grep "^+" | grep -cP "$pattern" 2>/dev/null || true)
+    if [[ "$added_matches" -gt 0 ]]; then
+      findings+=("{\"type\":\"debug\",\"severity\":\"warning\",\"pattern\":\"$pattern\",\"count\":$added_matches}")
+      warnings=$((warnings + added_matches))
+      warn "Debug statement: $pattern ($added_matches added)"
+    fi
+  done
+
+  # TODO/FIXME without issue reference
+  local todo_matches
+  todo_matches=$(echo "$diff" | grep "^+" | grep -ciP '(TODO|FIXME|HACK|XXX)(?!.*#\d)' 2>/dev/null || true)
+  if [[ "$todo_matches" -gt 0 ]]; then
+    findings+=("{\"type\":\"todo\",\"severity\":\"warning\",\"pattern\":\"TODO without issue ref\",\"count\":$todo_matches}")
+    warnings=$((warnings + todo_matches))
+    warn "TODO/FIXME without issue reference ($todo_matches)"
+  fi
+
+  # Disabled tests
+  local disabled_patterns=(
+    '@pytest\.mark\.skip'
+    'xit\('
+    'xdescribe\('
+    't\.Skip\('
+    '\.skip\('
+  )
+
+  for pattern in "${disabled_patterns[@]}"; do
+    local matches
+    matches=$(echo "$diff" | grep "^+" | grep -cP "$pattern" 2>/dev/null || true)
+    if [[ "$matches" -gt 0 ]]; then
+      findings+=("{\"type\":\"disabled_test\",\"severity\":\"warning\",\"pattern\":\"$pattern\",\"count\":$matches}")
+      warnings=$((warnings + matches))
+      warn "Disabled test: $pattern ($matches)"
+    fi
+  done
+
+  # Large files
+  while IFS= read -r file; do
+    if [[ -f "$file" ]]; then
+      local size
+      size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
+      if [[ "$size" -gt 1048576 ]]; then
+        local size_mb=$((size / 1048576))
+        findings+=("{\"type\":\"large_file\",\"severity\":\"warning\",\"pattern\":\"$file (${size_mb}MB)\",\"count\":1}")
+        warnings=$((warnings + 1))
+        warn "Large file: $file (${size_mb}MB)"
+      fi
+    fi
+  done <<< "$staged"
+
+  # JSON output
+  if [[ "$OUTPUT" == "json" ]]; then
+    local status="pass"
+    [[ $blockers -gt 0 ]] && status="fail"
+    [[ $warnings -gt 0 && $blockers -eq 0 ]] && status="warn"
+    local findings_json
+    findings_json=$(printf '%s\n' "${findings[@]}" | paste -sd',' - 2>/dev/null || echo "")
+    echo "{\"status\":\"$status\",\"blockers\":$blockers,\"warnings\":$warnings,\"findings\":[${findings_json}]}"
+  fi
+
+  # Summary
+  if [[ "$OUTPUT" == "text" ]]; then
+    echo ""
+    if [[ $blockers -gt 0 ]]; then
+      echo -e "${RED}${BOLD}BLOCKED${RESET}: $blockers blocking issue(s), $warnings warning(s)"
+    elif [[ $warnings -gt 0 ]]; then
+      echo -e "${YELLOW}${BOLD}WARNINGS${RESET}: $warnings warning(s), no blockers"
+    else
+      echo -e "${GREEN}${BOLD}CLEAN${RESET}: no issues found"
+    fi
+  fi
+
+  [[ $blockers -gt 0 ]] && exit 1
+  [[ $warnings -gt 0 ]] && exit 2
+  exit 0
+}
+
+# ── coverage ──────────────────────────────────────────────────────
+
+cmd_coverage() {
+  local spec_path="${VIBE_SPEC:-}"
+  local test_dir="${VIBE_TEST_DIR:-}"
+
+  # Parse args
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --spec) spec_path="$2"; shift 2 ;;
+      --test-dir) test_dir="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+
+  info "Running coverage analysis..."
+
+  # Detect project type and run coverage
+  local coverage_output=""
+  local coverage_pct=0
+  local tool_used=""
+
+  if [[ -f "pyproject.toml" || -f "setup.py" || -f "setup.cfg" ]]; then
+    tool_used="pytest"
+    info "Detected Python project, running pytest --cov"
+    coverage_output=$(python -m pytest --cov --cov-report=term-missing --no-header -q 2>&1) || true
+    coverage_pct=$(echo "$coverage_output" | grep -oP 'TOTAL\s+\d+\s+\d+\s+(\d+)%' | grep -oP '\d+%' | tr -d '%' || echo "0")
+
+  elif [[ -f "package.json" ]]; then
+    tool_used="jest/vitest"
+    info "Detected JS/TS project, running npm test -- --coverage"
+    coverage_output=$(npm test -- --coverage 2>&1) || true
+    coverage_pct=$(echo "$coverage_output" | grep -oP 'All files\s*\|\s*(\d+\.?\d*)' | grep -oP '\d+\.?\d*' | head -1 || echo "0")
+
+  elif [[ -f "go.mod" ]]; then
+    tool_used="go test"
+    info "Detected Go project, running go test -cover"
+    coverage_output=$(go test -cover ./... 2>&1) || true
+    # Average coverage across packages
+    local total=0 count=0
+    while IFS= read -r line; do
+      local pct
+      pct=$(echo "$line" | grep -oP 'coverage: (\d+\.?\d*)%' | grep -oP '\d+\.?\d*' || true)
+      if [[ -n "$pct" ]]; then
+        total=$(echo "$total + $pct" | bc)
+        count=$((count + 1))
+      fi
+    done <<< "$coverage_output"
+    [[ $count -gt 0 ]] && coverage_pct=$(echo "scale=1; $total / $count" | bc) || coverage_pct=0
+
+  else
+    die "Could not detect project type (no pyproject.toml, package.json, or go.mod)"
+  fi
+
+  # Spec-to-test coverage (Dimension 2)
+  local spec_total=0
+  local spec_covered=0
+  local spec_results=""
+
+  if [[ -n "$spec_path" && -f "$spec_path" ]]; then
+    info "Analyzing spec-to-test coverage from $spec_path"
+
+    # Count requirements (lines starting with - or * that contain "must", "should", "shall", or are under a ## heading)
+    spec_total=$(grep -cP '^\s*[-*]\s+' "$spec_path" 2>/dev/null || echo "0")
+
+    # Find test files and count req: markers
+    local test_search_dir="${test_dir:-tests}"
+    if [[ -d "$test_search_dir" ]]; then
+      spec_covered=$(grep -rlP '(# req:|// req:|test_req_)' "$test_search_dir" 2>/dev/null | xargs grep -cP '(# req:|// req:|test_req_)' 2>/dev/null | awk -F: '{s+=$2} END {print s+0}' || echo "0")
+    fi
+
+    spec_results=",\"spec_to_test\":{\"total\":$spec_total,\"covered\":$spec_covered}"
+  fi
+
+  # Output
+  if [[ "$OUTPUT" == "json" ]]; then
+    local status="pass"
+    [[ "${coverage_pct:-0}" -lt 70 ]] && status="fail"
+    echo "{\"status\":\"$status\",\"tool\":\"$tool_used\",\"line_coverage\":$coverage_pct${spec_results}}"
+  else
+    echo ""
+    echo -e "${BOLD}Coverage Summary${RESET}"
+    echo -e "  Tool: $tool_used"
+    echo -e "  Line coverage: ${coverage_pct}%"
+
+    if [[ -n "$spec_path" && -f "$spec_path" ]]; then
+      echo -e "  Spec requirements: $spec_total"
+      echo -e "  Req-linked tests: $spec_covered"
+    fi
+
+    echo ""
+    echo "$coverage_output" | tail -20
+  fi
+
+  [[ "${coverage_pct:-0}" -lt 70 ]] && exit 1
+  exit 0
+}
+
+# ── spec-drift ────────────────────────────────────────────────────
+
+cmd_spec_drift() {
+  local spec_path="${VIBE_SPEC:-}"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --spec) spec_path="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+
+  # Auto-detect spec
+  if [[ -z "$spec_path" ]]; then
+    for candidate in spec.md SPEC.md docs/spec.md docs/SPEC.md *_spec.md docs/*_spec.md; do
+      if [[ -f "$candidate" ]]; then
+        spec_path="$candidate"
+        break
+      fi
+    done
+  fi
+
+  [[ -z "$spec_path" || ! -f "$spec_path" ]] && die "No spec found. Use --spec <path> or set VIBE_SPEC"
+
+  info "Checking spec drift against $spec_path"
+
+  local staged
+  staged=$(git diff --cached --name-only 2>/dev/null) || die "Not in a git repository"
+
+  if [[ -z "$staged" ]]; then
+    pass "No staged changes"
+    [[ "$OUTPUT" == "json" ]] && echo '{"status":"pass","drift_items":0,"spec":"'"$spec_path"'"}'
+    exit 0
+  fi
+
+  # Extract spec sections (## headers)
+  local spec_sections
+  spec_sections=$(grep -nP '^#{1,3}\s+' "$spec_path" | head -50)
+
+  # Get the staged diff
+  local diff
+  diff=$(git diff --cached)
+
+  # Check which spec sections might be affected by the diff
+  # Simple heuristic: extract keywords from changed function/class names and match against spec headers
+  local changed_symbols
+  changed_symbols=$(echo "$diff" | grep -oP '^\+.*(def |func |function |class |type |struct |interface )\K\w+' | sort -u)
+
+  local drift_count=0
+  local drift_items=()
+
+  while IFS= read -r symbol; do
+    [[ -z "$symbol" ]] && continue
+    # Check if any spec section mentions this symbol (case-insensitive)
+    local matching_section
+    matching_section=$(echo "$spec_sections" | grep -i "$symbol" | head -1 || true)
+
+    if [[ -n "$matching_section" ]]; then
+      drift_count=$((drift_count + 1))
+      local line_num section_name
+      line_num=$(echo "$matching_section" | cut -d: -f1)
+      section_name=$(echo "$matching_section" | cut -d: -f2-)
+      drift_items+=("{\"symbol\":\"$symbol\",\"spec_section\":\"$(echo "$section_name" | sed 's/"/\\"/g')\",\"spec_line\":$line_num}")
+      warn "Changed '$symbol' — may affect spec section: $section_name"
+    fi
+  done <<< "$changed_symbols"
+
+  # Check for new files that might need spec sections
+  local new_files
+  new_files=$(git diff --cached --diff-filter=A --name-only 2>/dev/null || true)
+  if [[ -n "$new_files" ]]; then
+    local new_count
+    new_count=$(echo "$new_files" | wc -l)
+    if [[ $new_count -gt 0 ]]; then
+      drift_count=$((drift_count + new_count))
+      warn "$new_count new file(s) added — may need spec sections"
+      while IFS= read -r nf; do
+        drift_items+=("{\"symbol\":\"new_file\",\"spec_section\":\"(needs new section)\",\"file\":\"$nf\"}")
+      done <<< "$new_files"
+    fi
+  fi
+
+  if [[ "$OUTPUT" == "json" ]]; then
+    local status="pass"
+    [[ $drift_count -gt 0 ]] && status="drift_detected"
+    local items_json
+    items_json=$(printf '%s\n' "${drift_items[@]}" 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
+    echo "{\"status\":\"$status\",\"drift_items\":$drift_count,\"spec\":\"$spec_path\",\"items\":[${items_json}]}"
+  fi
+
+  echo ""
+  if [[ $drift_count -gt 0 ]]; then
+    echo -e "${YELLOW}${BOLD}DRIFT DETECTED${RESET}: $drift_count potential spec drift item(s)"
+    echo -e "Run ${BOLD}vibe-spec-sync${RESET} skill to review and update the spec."
+    exit 2
+  else
+    pass "No spec drift detected"
+    exit 0
+  fi
+}
+
+# ── decisions ─────────────────────────────────────────────────────
+
+cmd_decisions() {
+  info "Extracting decisions from staged changes..."
+
+  local staged
+  staged=$(git diff --cached --name-only 2>/dev/null) || die "Not in a git repository"
+
+  if [[ -z "$staged" ]]; then
+    pass "No staged changes"
+    [[ "$OUTPUT" == "json" ]] && echo '{"status":"pass","decisions":[]}'
+    exit 0
+  fi
+
+  local diff
+  diff=$(git diff --cached --stat)
+  local files_changed
+  files_changed=$(echo "$staged" | wc -l)
+
+  # Extract potential decisions by looking for structural changes
+  local decisions=()
+  local decision_count=0
+
+  # New abstractions (class/struct/interface/type definitions)
+  local new_types
+  new_types=$(git diff --cached | grep -oP '^\+.*(class |struct |interface |type )\K\w+' | sort -u)
+  while IFS= read -r t; do
+    [[ -z "$t" ]] && continue
+    decisions+=("{\"type\":\"new_abstraction\",\"description\":\"Introduced $t\",\"source\":\"diff\"}")
+    decision_count=$((decision_count + 1))
+    info "New abstraction: $t"
+  done <<< "$new_types"
+
+  # New dependencies
+  local new_deps=""
+  if [[ -f "pyproject.toml" ]]; then
+    new_deps=$(git diff --cached -- pyproject.toml | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '"\K[a-zA-Z0-9_-]+(?=[><=~])' || true)
+  elif [[ -f "package.json" ]]; then
+    new_deps=$(git diff --cached -- package.json | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '"(\K[^"]+)(?="\s*:)' || true)
+  elif [[ -f "go.mod" ]]; then
+    new_deps=$(git diff --cached -- go.mod | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '\S+/\S+' || true)
+  fi
+  while IFS= read -r dep; do
+    [[ -z "$dep" ]] && continue
+    decisions+=("{\"type\":\"new_dependency\",\"description\":\"Added dependency: $dep\",\"source\":\"diff\"}")
+    decision_count=$((decision_count + 1))
+    info "New dependency: $dep"
+  done <<< "$new_deps"
+
+  # API changes (new routes, endpoints)
+  local api_changes
+  api_changes=$(git diff --cached | grep -oP '^\+.*(app\.(get|post|put|delete|patch)|@(app|router)\.(get|post|put|delete|patch)|HandleFunc|http\.Handle)\s*\(\s*["\x27/]\K[^"\x27]+' | sort -u || true)
+  while IFS= read -r route; do
+    [[ -z "$route" ]] && continue
+    decisions+=("{\"type\":\"api_change\",\"description\":\"New/changed endpoint: $route\",\"source\":\"diff\"}")
+    decision_count=$((decision_count + 1))
+    info "API change: $route"
+  done <<< "$api_changes"
+
+  # Config/env changes
+  local config_changes
+  config_changes=$(echo "$staged" | grep -iP '(config|\.env|settings|\.ya?ml)' || true)
+  while IFS= read -r cfg; do
+    [[ -z "$cfg" ]] && continue
+    decisions+=("{\"type\":\"config_change\",\"description\":\"Configuration changed: $cfg\",\"source\":\"diff\"}")
+    decision_count=$((decision_count + 1))
+    info "Config change: $cfg"
+  done <<< "$config_changes"
+
+  # Output
+  if [[ "$OUTPUT" == "json" ]]; then
+    local status="pass"
+    [[ $decision_count -gt 0 ]] && status="decisions_found"
+    local items_json
+    items_json=$(printf '%s\n' "${decisions[@]}" 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
+    echo "{\"status\":\"$status\",\"count\":$decision_count,\"files_changed\":$files_changed,\"decisions\":[${items_json}]}"
+  fi
+
+  echo ""
+  if [[ $decision_count -gt 0 ]]; then
+    echo -e "${YELLOW}${BOLD}$decision_count decision(s) detected${RESET} from $files_changed changed file(s)"
+    echo -e "Run ${BOLD}vibe-decision-journal${RESET} skill for full extraction and recording."
+    exit 2
+  else
+    pass "No notable decisions detected in staged changes"
+    exit 0
+  fi
+}
+
+# ── validate ──────────────────────────────────────────────────────
+
+cmd_validate() {
+  info "Running skill validation..."
+  exec "$SCRIPT_DIR/validate-skills.sh"
+}
+
+# ── hook ──────────────────────────────────────────────────────────
+
+cmd_hook() {
+  local action="${1:-}"
+  local hook_path
+  hook_path="$(git rev-parse --git-dir 2>/dev/null)/hooks/pre-commit" || die "Not in a git repository"
+
+  case "$action" in
+    install)
+      local hook_content
+      hook_content="$(cat <<'HOOK'
+#!/usr/bin/env bash
+# vibe-engineering pre-commit hook
+# Runs pre-commit audit. Exit 1 = blocked, Exit 2 = warnings (allowed).
+
+VIBE_SCRIPT="$(git rev-parse --show-toplevel)/scripts/vibe-cli"
+
+if [[ -x "$VIBE_SCRIPT" ]]; then
+  "$VIBE_SCRIPT" pre-commit
+  exit_code=$?
+  # Exit 1 = blocker (block commit), Exit 2 = warning (allow commit)
+  if [[ $exit_code -eq 1 ]]; then
+    echo ""
+    echo "Commit blocked by vibe pre-commit. Fix blocking issues above."
+    exit 1
+  fi
+  # Warnings (exit 2) don't block
+fi
+exit 0
+HOOK
+)"
+      echo "$hook_content" > "$hook_path"
+      chmod +x "$hook_path"
+      pass "Pre-commit hook installed at $hook_path"
+      ;;
+    uninstall)
+      if [[ -f "$hook_path" ]] && grep -q "vibe-engineering" "$hook_path"; then
+        rm "$hook_path"
+        pass "Pre-commit hook removed"
+      else
+        warn "No vibe pre-commit hook found at $hook_path"
+      fi
+      ;;
+    *)
+      die "Usage: vibe hook install|uninstall"
+      ;;
+  esac
+}
+
+# ── main ──────────────────────────────────────────────────────────
+
+# Parse global options
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json) OUTPUT="json"; shift ;;
+    --help|-h) cmd_help; exit 0 ;;
+    *) ARGS+=("$1"); shift ;;
+  esac
+done
+set -- "${ARGS[@]}"
+
+COMMAND="${1:-help}"
+shift || true
+
+case "$COMMAND" in
+  pre-commit)   cmd_pre_commit "$@" ;;
+  coverage)     cmd_coverage "$@" ;;
+  spec-drift)   cmd_spec_drift "$@" ;;
+  decisions)    cmd_decisions "$@" ;;
+  validate)     cmd_validate "$@" ;;
+  hook)         cmd_hook "$@" ;;
+  help)         cmd_help ;;
+  version)      echo "vibe-cli v${VERSION}" ;;
+  *)            die "Unknown command: $COMMAND. Run 'vibe help' for usage." ;;
+esac
