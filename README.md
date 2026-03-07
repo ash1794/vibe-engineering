@@ -353,7 +353,7 @@ user-invocable: true
 
 ## Origin Story
 
-These skills were extracted from building [nosaintsville-agent](https://github.com/ash1794/nosaintsville-agent) — an 11-agent personal assistant system with Go backend, React Native frontend, and 205+ test files.
+These skills were extracted from building an 11-agent personal assistant system with Go backend, React Native frontend, and 205+ test files.
 
 **The numbers:**
 - 50+ session observations analyzed (310k+ tokens of development history)
@@ -361,9 +361,9 @@ These skills were extracted from building [nosaintsville-agent](https://github.c
 - 3 weeks of intensive multi-agent development
 - Every skill represents a pattern that emerged from real pain — not a theoretical best practice document
 
-## Related Projects
+## Also Check Out
 
-- [nosaintsville-agent](https://github.com/ash1794/nosaintsville-agent) — The 11-agent personal assistant system where these skills were born
+- **[bart-coaching](https://github.com/ash1794/bart-coaching)** — Growth-oriented coaching hooks for Claude Code. Provides real-time technical depth insights, operational maturity nudges, and behavioral self-awareness mirrors with compound reflections across sessions. Pairs well with vibe-engineering for engineers who want both discipline tools and growth feedback.
 
 ## License
 
