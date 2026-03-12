@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/ash1794/vibe-engineering)
+[![OpenAI Codex Skills](https://img.shields.io/badge/OpenAI%20Codex-Skills-10a37f)](https://developers.openai.com/codex/skills/)
 [![Skills](https://img.shields.io/badge/Skills-38-green)](https://github.com/ash1794/vibe-engineering)
 
 **38 engineering discipline skills for Claude Code & OpenAI Codex + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
