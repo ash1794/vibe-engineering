@@ -4,7 +4,7 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/ash1794/vibe-engineering)
 [![Skills](https://img.shields.io/badge/Skills-38-green)](https://github.com/ash1794/vibe-engineering)
 
-**38 engineering discipline skills for Claude Code + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
+**38 engineering discipline skills for Claude Code & OpenAI Codex + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
 
 > "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain.
 
@@ -18,7 +18,7 @@ Claude automatically discovers and applies the right skill for every task — re
 
 ## What is this?
 
-A Claude Code plugin with 38 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
+A skill collection for Claude Code and OpenAI Codex with 38 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
 
 - **Research & Decision-Making** (5 skills) — Think before building
 - **Quality Gates & Validation** (7 skills) — Catch issues before they ship
@@ -32,19 +32,43 @@ A Claude Code plugin with 38 skills that enforce engineering discipline across a
 
 ## Installation
 
-### Option 1: Install from GitHub (recommended)
+### Claude Code
 
 ```bash
+# From GitHub (recommended)
 claude plugin add github:ash1794/vibe-engineering
-```
 
-That's it. All 38 skills are now available in every Claude Code session.
-
-### Option 2: Development / local testing
-
-```bash
+# Or local development
 git clone https://github.com/ash1794/vibe-engineering.git
 claude --plugin-dir ./vibe-engineering
+```
+
+All 38 skills are now available in every Claude Code session.
+
+### OpenAI Codex
+
+```bash
+# Clone into your home skills directory (available in all projects)
+git clone https://github.com/ash1794/vibe-engineering.git ~/.agents/skills/vibe-engineering
+
+# Or clone into a specific project (available only in that project)
+mkdir -p .agents/skills
+git clone https://github.com/ash1794/vibe-engineering.git .agents/skills/vibe-engineering
+```
+
+Codex discovers skills from `.agents/skills/` automatically. Each skill's `SKILL.md` frontmatter drives implicit matching.
+
+### Symlink Installation (both platforms)
+
+If you already have the repo cloned, symlink it for Codex discovery:
+
+```bash
+# Per-project
+mkdir -p .agents/skills
+ln -s /path/to/vibe-engineering/skills/* .agents/skills/
+
+# Or user-wide
+ln -s /path/to/vibe-engineering/skills/* ~/.agents/skills/
 ```
 
 ## Quick Start
@@ -58,9 +82,13 @@ Explore available skills interactively:
 
 Invoke any skill directly:
 ```
+# Claude Code
 /vibe-engineering:vibe-quality-loop
 /vibe-engineering:vibe-research-before-design
-/vibe-engineering:vibe-reflect-and-compound
+
+# Codex
+$vibe-quality-loop
+$vibe-research-before-design
 ```
 
 ## CLI: `vibe-cli`
@@ -274,19 +302,27 @@ Without discipline skills, AI coding assistants make the same mistakes humans do
 
 ## How It Works
 
-This is a standard Claude Code plugin. The `.claude-plugin/plugin.json` manifest registers it, and the `skills/` directory contains 38 skill definitions that Claude auto-discovers based on task context.
+Works as both a Claude Code plugin and a Codex skill collection. The same `SKILL.md` files are discovered by both platforms:
+
+- **Claude Code**: `.claude-plugin/plugin.json` registers the plugin; `skills/` directory is auto-discovered
+- **Codex**: `.agents/skills/` symlinks to `skills/`; Codex discovers skills from this standard path
 
 ```
 vibe-engineering/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin manifest
-├── skills/                  # 38 skill definitions
+│   └── plugin.json          # Claude Code plugin manifest
+├── .agents/
+│   └── skills → ../../skills  # Codex discovery (symlink)
+├── AGENTS.md                # Codex project instructions
+├── skills/                  # 38 skill definitions (shared)
 │   ├── vibe-help/SKILL.md
 │   ├── quality-loop/SKILL.md
 │   ├── spec-sync/SKILL.md
 │   ├── decision-journal/SKILL.md
 │   ├── gap-analysis/SKILL.md
 │   └── ... (33 more)
+├── references/
+│   └── codex-tools.md       # Tool name mapping across platforms
 ├── scripts/
 │   ├── vibe-cli           # CLI for CI/CD enforcement
 │   └── validate-skills.sh # Skill file validator

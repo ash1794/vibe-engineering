@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-03-12
+
+### Added
+- OpenAI Codex compatibility — skills now discoverable by both Claude Code and Codex
+- `.agents/skills/` symlink for Codex skill discovery
+- `AGENTS.md` — project instructions for Codex (equivalent of CLAUDE.md)
+- `references/codex-tools.md` — tool name mapping between Claude Code and Codex
+- Codex installation instructions in README
+
+### Changed
+- README updated to reflect dual-platform support (Claude Code + Codex)
+- Project description now references both platforms
+
 ## [1.4.0] - 2026-03-07
 
 ### Added
