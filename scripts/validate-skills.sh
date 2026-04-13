@@ -90,6 +90,48 @@ if [[ -f "$README" ]]; then
 fi
 
 echo
+echo "=== Plugin Structure Invariants ==="
+# These three invariants, if any is broken, produce either an uninstallable
+# repo or a recursive plugin-cache loop. See CLAUDE.md "Plugin structure
+# invariants" and commit c5ffb98 for the incident history.
+
+# Invariant 1: .claude-plugin/marketplace.json MUST exist at repo root.
+# Without it, `/plugin marketplace add` has nothing to catalog — the
+# plugin becomes uninstallable via any supported Claude Code flow.
+if [[ -f "$MARKETPLACE_JSON" ]]; then
+  echo "  [1/3] marketplace.json present at repo root"
+else
+  error "[1/3] $MARKETPLACE_JSON is missing — plugin would be uninstallable"
+fi
+
+# Invariant 2: plugin directory MUST NOT be the repo root (which is the
+# marketplace root). If plugin.json sits next to marketplace.json, the
+# plugin's cache copy contains marketplace.json, Claude Code re-enumerates
+# it as a marketplace, and cache/.../cache/... recurses until ENAMETOOLONG.
+if [[ -f "$REPO_ROOT/.claude-plugin/plugin.json" ]]; then
+  error "[2/3] plugin.json found at repo root — move it into plugins/<name>/.claude-plugin/ to prevent recursive cache nesting"
+elif [[ -f "$PLUGIN_JSON" && "$PLUGIN_ROOT" != "$REPO_ROOT" ]]; then
+  echo "  [2/3] plugin lives in subdirectory (plugins/vibe-engineering/)"
+else
+  error "[2/3] plugin.json not found at $PLUGIN_JSON"
+fi
+
+# Invariant 3: marketplace name MUST differ from plugin name. Same-name
+# collision confuses Claude Code's plugin/marketplace registries and was
+# the amplifier for issue #1.
+if [[ -f "$MARKETPLACE_JSON" && -f "$PLUGIN_JSON" ]]; then
+  mp_name=$(grep -m1 '"name"' "$MARKETPLACE_JSON" | sed 's/.*: *"\(.*\)".*/\1/')
+  pl_name=$(grep -m1 '"name"' "$PLUGIN_JSON" | sed 's/.*: *"\(.*\)".*/\1/')
+  if [[ -z "$mp_name" || -z "$pl_name" ]]; then
+    error "[3/3] could not extract names (marketplace='$mp_name', plugin='$pl_name')"
+  elif [[ "$mp_name" == "$pl_name" ]]; then
+    error "[3/3] marketplace name '$mp_name' collides with plugin name '$pl_name' — pick distinct names (e.g. 'vibe-plugins' / 'vibe-engineering')"
+  else
+    echo "  [3/3] names distinct: marketplace='$mp_name' plugin='$pl_name'"
+  fi
+fi
+
+echo
 echo "=== Summary ==="
 echo "Skills: $skill_count | Errors: $errors | Warnings: $warnings"
 
