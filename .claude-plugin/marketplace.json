@@ -1,0 +1,40 @@
+{
+  "name": "vibe-plugins",
+  "metadata": {
+    "description": "Marketplace for vibe-engineering plugins — engineering discipline skills for Claude Code and OpenAI Codex"
+  },
+  "owner": {
+    "name": "Ashwin K",
+    "email": "ash1794@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "vibe-engineering",
+      "source": "./plugins/vibe-engineering",
+      "description": "38 engineering discipline skills — research, quality gates, testing patterns, deployment, learning, gap analysis, spec sync, and more. Extracted from real-world development.",
+      "version": "1.5.1",
+      "author": {
+        "name": "Ashwin K",
+        "email": "ash1794@gmail.com"
+      },
+      "homepage": "https://github.com/ash1794/vibe-engineering",
+      "repository": "https://github.com/ash1794/vibe-engineering",
+      "license": "MIT",
+      "category": "development",
+      "keywords": [
+        "skills",
+        "engineering",
+        "quality",
+        "testing",
+        "debugging",
+        "deployment",
+        "tdd",
+        "code-review",
+        "best-practices",
+        "workflows",
+        "vibe-coding",
+        "discipline"
+      ]
+    }
+  ]
+}

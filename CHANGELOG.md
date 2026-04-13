@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-04-13
+
+### Fixed
+- **Plugin is installable again.** Restored `.claude-plugin/marketplace.json` so users can actually add the repo as a marketplace and install the plugin. The previous "fix" that removed `marketplace.json` made the plugin uninstallable via any supported Claude Code flow.
+- **Root cause of the earlier recursion bug (#1) properly addressed.** The plugin now lives in `plugins/vibe-engineering/` instead of at the repo root, so the plugin's cache copy no longer contains `marketplace.json`. This was the real source of the `cache/.../cache/...` nesting loop — not the marketplace file itself.
+
+### Changed
+- Repo restructured as a marketplace hosting one plugin:
+  - `.claude-plugin/marketplace.json` at repo root (marketplace: `vibe-plugins`)
+  - `plugins/vibe-engineering/.claude-plugin/plugin.json` (plugin: `vibe-engineering`)
+  - `plugins/vibe-engineering/skills/` (all 38 skill definitions)
+- Marketplace name is `vibe-plugins` (not `vibe-engineering`) to avoid the name collision with the plugin it hosts.
+- `.agents/skills` symlink repointed to `../plugins/vibe-engineering/skills` so Codex discovery still works.
+- README install instructions rewritten to the correct `/plugin marketplace add` + `/plugin install` syntax. The old `claude plugin add github:...` command never existed.
+- `scripts/validate-skills.sh` updated for the new layout.
+
+### Install
+
+```bash
+/plugin marketplace add ash1794/vibe-engineering
+/plugin install vibe-engineering@vibe-plugins
+```
+
 ## [1.5.0] - 2026-03-12
 
 ### Added

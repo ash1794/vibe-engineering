@@ -9,10 +9,11 @@
 
 > "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain.
 
-### One command. Instant engineering discipline.
+### Two commands. Instant engineering discipline.
 
 ```bash
-claude plugin add github:ash1794/vibe-engineering
+/plugin marketplace add ash1794/vibe-engineering
+/plugin install vibe-engineering@vibe-plugins
 ```
 
 Claude automatically discovers and applies the right skill for every task — research before design, quality gates before shipping, structured debugging before guessing, test coverage before claiming "done."
@@ -35,42 +36,45 @@ A skill collection for Claude Code and OpenAI Codex with 38 skills that enforce 
 
 ### Claude Code
 
-```bash
-# From GitHub (recommended)
-claude plugin add github:ash1794/vibe-engineering
+From inside a Claude Code session:
 
-# Or local development
+```bash
+# 1. Add the marketplace (one-time)
+/plugin marketplace add ash1794/vibe-engineering
+
+# 2. Install the plugin
+/plugin install vibe-engineering@vibe-plugins
+```
+
+Later, pull updates with `/plugin marketplace update vibe-plugins`.
+
+Local development (unpackaged, for testing plugin changes):
+
+```bash
 git clone https://github.com/ash1794/vibe-engineering.git
-claude --plugin-dir ./vibe-engineering
+claude --plugin-dir ./vibe-engineering/plugins/vibe-engineering
 ```
 
 All 38 skills are now available in every Claude Code session.
 
 ### OpenAI Codex
 
-```bash
-# Clone into your home skills directory (available in all projects)
-git clone https://github.com/ash1794/vibe-engineering.git ~/.agents/skills/vibe-engineering
+Clone the repo anywhere, then symlink the plugin's `skills/` directory into `.agents/skills/` so Codex can discover the individual skill folders:
 
-# Or clone into a specific project (available only in that project)
+```bash
+# Clone once, symlink many times
+git clone https://github.com/ash1794/vibe-engineering.git ~/src/vibe-engineering
+
+# User-wide (available in all projects)
+mkdir -p ~/.agents/skills
+ln -s ~/src/vibe-engineering/plugins/vibe-engineering/skills/* ~/.agents/skills/
+
+# Or per-project
 mkdir -p .agents/skills
-git clone https://github.com/ash1794/vibe-engineering.git .agents/skills/vibe-engineering
+ln -s ~/src/vibe-engineering/plugins/vibe-engineering/skills/* .agents/skills/
 ```
 
 Codex discovers skills from `.agents/skills/` automatically. Each skill's `SKILL.md` frontmatter drives implicit matching.
-
-### Symlink Installation (both platforms)
-
-If you already have the repo cloned, symlink it for Codex discovery:
-
-```bash
-# Per-project
-mkdir -p .agents/skills
-ln -s /path/to/vibe-engineering/skills/* .agents/skills/
-
-# Or user-wide
-ln -s /path/to/vibe-engineering/skills/* ~/.agents/skills/
-```
 
 ## Quick Start
 
@@ -303,30 +307,33 @@ Without discipline skills, AI coding assistants make the same mistakes humans do
 
 ## How It Works
 
-Works as both a Claude Code plugin and a Codex skill collection. The same `SKILL.md` files are discovered by both platforms:
+The repo is a Claude Code **marketplace** (`vibe-plugins`) that ships one plugin (`vibe-engineering`), which doubles as a Codex skill collection. The same `SKILL.md` files are consumed by both platforms:
 
-- **Claude Code**: `.claude-plugin/plugin.json` registers the plugin; `skills/` directory is auto-discovered
-- **Codex**: `.agents/skills/` symlinks to `skills/`; Codex discovers skills from this standard path
+- **Claude Code**: `.claude-plugin/marketplace.json` at the repo root catalogs the plugin; the plugin itself lives in `plugins/vibe-engineering/` with its own `.claude-plugin/plugin.json`
+- **Codex**: `.agents/skills/` symlinks into the plugin's `skills/` directory; Codex discovers skills from this standard path
 
 ```
-vibe-engineering/
+vibe-engineering/                          # repo root = marketplace root
 ├── .claude-plugin/
-│   └── plugin.json          # Claude Code plugin manifest
+│   └── marketplace.json                   # marketplace: "vibe-plugins"
+├── plugins/
+│   └── vibe-engineering/                  # plugin root
+│       ├── .claude-plugin/plugin.json     # plugin: "vibe-engineering"
+│       └── skills/                        # 38 skill definitions
+│           ├── vibe-help/SKILL.md
+│           ├── quality-loop/SKILL.md
+│           ├── spec-sync/SKILL.md
+│           ├── decision-journal/SKILL.md
+│           ├── gap-analysis/SKILL.md
+│           └── ... (33 more)
 ├── .agents/
-│   └── skills → ../../skills  # Codex discovery (symlink)
-├── AGENTS.md                # Codex project instructions
-├── skills/                  # 38 skill definitions (shared)
-│   ├── vibe-help/SKILL.md
-│   ├── quality-loop/SKILL.md
-│   ├── spec-sync/SKILL.md
-│   ├── decision-journal/SKILL.md
-│   ├── gap-analysis/SKILL.md
-│   └── ... (33 more)
+│   └── skills → ../plugins/vibe-engineering/skills  # Codex discovery (symlink)
+├── AGENTS.md                              # Codex project instructions
 ├── references/
-│   └── codex-tools.md       # Tool name mapping across platforms
+│   └── codex-tools.md                     # Tool name mapping across platforms
 ├── scripts/
-│   ├── vibe-cli           # CLI for CI/CD enforcement
-│   └── validate-skills.sh # Skill file validator
+│   ├── vibe-cli                           # CLI for CI/CD enforcement
+│   └── validate-skills.sh                 # Skill file validator
 └── README.md
 ```
 
@@ -342,7 +349,7 @@ Each skill has:
 Found a pattern that keeps saving you? Turn it into a skill:
 
 1. Fork this repo
-2. Create `skills/your-skill-name/SKILL.md`
+2. Create `plugins/vibe-engineering/skills/your-skill-name/SKILL.md`
 3. Follow the template (see any existing skill)
 4. Include: When to Use, When NOT to Use, Steps, Output Format
 5. Submit a PR

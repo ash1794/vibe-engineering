@@ -5,8 +5,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKILLS_DIR="$REPO_ROOT/skills"
-PLUGIN_JSON="$REPO_ROOT/.claude-plugin/plugin.json"
+PLUGIN_ROOT="$REPO_ROOT/plugins/vibe-engineering"
+SKILLS_DIR="$PLUGIN_ROOT/skills"
+PLUGIN_JSON="$PLUGIN_ROOT/.claude-plugin/plugin.json"
 MARKETPLACE_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
 README="$REPO_ROOT/README.md"
 

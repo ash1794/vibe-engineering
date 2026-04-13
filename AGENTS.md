@@ -4,7 +4,7 @@
 
 ## Skills
 
-Skills live in `skills/*/SKILL.md` (also symlinked at `.agents/skills/` for Codex discovery).
+Skills live in `plugins/vibe-engineering/skills/*/SKILL.md` (also symlinked at `.agents/skills/` for Codex discovery).
 
 Each skill has YAML frontmatter with `name`, `description`, and `user-invocable: true`.
 
@@ -28,8 +28,9 @@ Skills reference Claude Code tool names. Codex equivalents are documented in `re
 
 | Path | Purpose |
 |------|---------|
-| `skills/` | All 38 skill definitions |
+| `.claude-plugin/marketplace.json` | Marketplace catalog (`vibe-plugins`) |
+| `plugins/vibe-engineering/.claude-plugin/plugin.json` | Claude Code plugin manifest |
+| `plugins/vibe-engineering/skills/` | All 38 skill definitions |
 | `.agents/skills/` | Symlink for Codex discovery |
-| `.claude-plugin/plugin.json` | Claude Code plugin manifest |
 | `scripts/vibe-cli` | CI/CD enforcement CLI |
 | `references/codex-tools.md` | Tool name mapping across platforms |
