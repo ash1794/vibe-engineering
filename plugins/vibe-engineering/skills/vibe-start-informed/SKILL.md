@@ -17,6 +17,13 @@ Other people's documented failures count as observed failure. Research SOTA befo
 
 **Not for:** Implementing already-designed specs, bug fixes, or tasks with clear requirements.
 
+## When NOT to Use
+
+- Implementing an already-designed spec with clear requirements
+- Bug fixes where the approach is already known
+- Routine/mechanical changes with one obvious correct solution
+- When the design decision has already been researched and recorded
+
 ## The Rule
 
 **BEFORE proposing any approach, dispatch a research agent** to find real papers, real projects, and real production systems that solve the same (or adjacent) problem.
