@@ -1,3 +1,5 @@
+
+
 # vibe-engineering
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -201,10 +203,10 @@ vibe-spec-vs-code-audit ──→ Final verification: no remaining gaps
 ```
 
 The CLI exposes the critical parts for automation:
-- `vibe decisions` → extract decisions from staged changes
-- `vibe spec-drift` → detect spec-code drift
-- `vibe coverage` → verify all coverage dimensions
-- `vibe pre-commit` → block commits with secrets/debug code
+- `vibe-cli decisions` → extract decisions from staged changes
+- `vibe-cli spec-drift` → detect spec-code drift
+- `vibe-cli coverage` → verify all coverage dimensions
+- `vibe-cli pre-commit` → block commits with secrets/debug code
 
 ## Skill Catalog
 
