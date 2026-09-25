@@ -1,6 +1,6 @@
 ---
 name: vibe-spec-sync
-description: Bidirectional sync between specification documents and code. Detects spec drift from staged changes, updates spec to reflect approved decisions, and ensures every commit represents a reconciled snapshot of spec, tests, and code.
+description: Keeps specification documents and code in agreement. Audit mode finds every divergence when an implementation is claimed complete; sync mode detects spec drift in staged changes and updates the spec after user approval, so each commit is a reconciled snapshot of spec, tests, and code.
 user-invocable: true
 ---
 
@@ -10,16 +10,24 @@ Code changes. Specs don't update themselves. This skill closes the loop.
 
 ## When to Use This Skill
 
-- Before committing — detect spec drift from staged changes
-- After approving decisions (from `vibe-decision-journal`) — sync them back to spec
-- When `vibe-spec-vs-code-audit` found gaps — fix them
-- Periodically — ensure spec still reflects reality
+- **Audit mode**: implementation of a spec or design doc is claimed complete, after a major refactor, or when debugging behavior that may not match the spec
+- **Sync mode**: before committing, to detect spec drift from staged changes
+- **Sync mode**: after approving decisions (from `vibe-decision-journal`), to sync them back to the spec
+- Periodically, to confirm the spec still reflects reality
 
 ## When NOT to Use This Skill
 
 - No spec exists (write one first, or use `vibe-doc-quality-gate` to bootstrap)
 - Prototype/spike code with no spec commitment
 - Spec is explicitly labeled as aspirational/future-state
+- Code was intentionally diverged, with the reasons documented
+
+## Modes
+
+```
+/vibe-spec-sync            # Sync mode: staged changes vs spec (default)
+/vibe-spec-sync --audit    # Audit mode: full spec vs implementation, no edits
+```
 
 ## Prerequisites
 
@@ -30,7 +38,7 @@ The project must have:
 
 ## Steps
 
-### Step 1: Locate Spec and Code
+### Step 1: Locate Spec and Code (both modes)
 
 1. **Find the spec** — Look for:
    - `spec.md`, `SPEC.md`, `*_spec.md` in project root or `docs/`
@@ -40,6 +48,20 @@ The project must have:
 2. **Find the implementation** — The code files the spec describes
 
 3. **Find the decision log** — `docs/decisions/decisions.jsonl` (from `vibe-decision-journal`)
+
+### Audit Mode (`--audit`)
+
+Read-only. Nothing is edited.
+
+1. For **each requirement or section** in the spec, find the corresponding code and check whether it matches exactly.
+2. Record each divergence as a gap:
+   - **ID**: `GAP-[SECTION]-[NNN]` (e.g., `GAP-AUTH-001`)
+   - **Type**: Missing (spec says X, code has nothing) / Incorrect (spec says X, code does Y) / Extra (code does X, spec is silent)
+   - **Severity**: Critical / High / Medium / Low
+   - **Evidence**: the spec quote and the code `file:line`
+3. Report using the Audit Report format below. For 10+ gaps, hand them to `vibe-gap-closure-loop`. To accept an **Extra** or **Incorrect** item as the new intended behavior, run sync mode on it.
+
+**Sync mode (default)** continues with Steps 2–5 below.
 
 ### Step 2: Extract Drift from Staged Changes
 
@@ -61,7 +83,7 @@ Run `git diff --cached` and analyze what changed relative to the spec:
      Suggested spec update: "[proposed new text]"
    ```
 
-3. **Present drift items** to the user via `AskUserQuestion`:
+3. **Present drift items** to the user for a decision (use the harness's structured question tool if it has one; otherwise ask in plain text and wait):
    - **Approve update** — update the spec to match the code
    - **Approve with edits** — user refines the proposed spec text
    - **Reject** — the code is wrong; flag for fix (do NOT update spec)
@@ -104,7 +126,19 @@ After applying updates:
 
 ## Output Format
 
-### Spec Sync Report
+### Audit Report (audit mode)
+
+**Spec**: [path] · **Implementation**: [paths]
+**Gaps found**: X (Y critical, Z high)
+
+| GAP ID | Type | Severity | Spec says | Code does |
+|--------|------|----------|-----------|-----------|
+| GAP-AUTH-001 | Missing | Critical | "Tokens expire after 24h" | No expiration logic (`auth/token.go`) |
+
+**Top risks**: [the 1–3 most dangerous gaps]
+**Recommended fix order**: [critical first]
+
+### Spec Sync Report (sync mode)
 
 **Spec**: [path/to/spec.md]
 **Staged Changes Analyzed**: [N files, M insertions, K deletions]
@@ -127,12 +161,12 @@ After applying updates:
 ### Next Steps
 - [ ] Fix rejected drift item #3 (code contradicts spec on data retention)
 - [ ] Add tests for `## Rate Limiting` section
-- [ ] Run `vibe-spec-vs-code-audit` to verify full alignment
+- [ ] Run `/vibe-spec-sync --audit` to verify full alignment
 
 ## Integration with Other Skills
 
 - **`vibe-decision-journal`**: Decisions feed into spec sync. When decisions are approved, this skill updates the spec to reflect them.
-- **`vibe-spec-vs-code-audit`**: Run after sync to verify no remaining gaps.
+- **`vibe-gap-closure-loop`**: Closes large sets of audit-mode gaps in prioritized waves.
 - **`vibe-adversarial-test-generation`** (spec-driven mode): Generate tests for requirements that were updated or added during sync.
 - **`vibe-coverage-enforcer`**: Verify that test coverage still meets tier targets after spec-driven test additions.
 - **`vibe-pre-commit-audit`**: Complementary — that skill checks for secrets/debug code; this skill checks for spec alignment. Both belong in a pre-commit workflow.

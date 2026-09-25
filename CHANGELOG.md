@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-25
+
+Every skill was re-audited against current Claude, GPT (Codex), and Gemini models and their agent harnesses. Skills that duplicate what the model or harness now does well were retired, overlapping skills were merged, and the rest were updated to be model- and harness-neutral. **38 → 29 skills.**
+
+### Removed (handled natively by current models/harnesses)
+- `vibe-session-context-flush`: Claude Code, Codex, and Gemini CLI all compact context automatically, and models can't reliably detect their own context degradation. Cross-session handoff lives in `vibe-handover-doc`.
+- `vibe-structured-output`: current models format well by default, and a fixed 4-section template padded short answers.
+- `vibe-using-vibe-engineering`: the always-on "invoke if 1% chance" bootstrap caused over-triggering on current models, which follow instructions closely. All three agents now select skills from their descriptions. Routing lives in `vibe-help`.
+- `vibe-async-task-queue`: a private JSON queue competes with native task tools and real issue trackers.
+
+### Merged
+| Old skill | Now |
+|-----------|-----|
+| `vibe-start-informed` | `vibe-research-before-design` (near-duplicate) |
+| `vibe-debugging-journal` | `vibe-reflect-and-compound` (Bug entry type) |
+| `vibe-pattern-library` | `vibe-reflect-and-compound` (Pattern entry type) |
+| `vibe-wave-based-remediation` | `vibe-gap-closure-loop` (priority waves, any findings list) |
+| `vibe-spec-vs-code-audit` | `vibe-spec-sync --audit` |
+
+### Changed
+- **Skill folders renamed to match `name`** (e.g. `quality-loop/` → `vibe-quality-loop/`), as the Agent Skills spec requires. Skill names and invocation commands are unchanged.
+- **Gemini CLI support**: documented install via the shared `.agents/skills/` path; added `GEMINI.md`.
+- `references/codex-tools.md` → `references/platform-tools.md`: capability mapping across Claude Code, Codex, and Gemini CLI, plus portability rules for skill authors.
+- `vibe-anti-rationalization-check`: refocused on reward hacking (test tampering, special-casing, hard-coded outputs, unverified "tests pass" claims). It previously said "don't mention the temptation"; it now requires disclosing any shortcut.
+- `vibe-research-before-design`: sources must actually be opened in the session; no adoption numbers from memory.
+- `vibe-reflect-and-compound`: writes to the memory file the agent actually loads (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`).
+- `vibe-handover-doc`: scoped to handoffs across people, tools, or sessions (in-session continuity is the harness's job).
+- `vibe-devil-advocate-review`: prefers a fresh-context or different-model reviewer, and requires evidence for every issue.
+- `vibe-quality-loop`: uses the repo's own checks and native review commands; dropped arbitrary rules like "functions over 50 lines"; added stop conditions.
+- `vibe-scope-guard` / `vibe-production-mindset`: production checklist scaled to real stakes and existing conventions, so the two skills no longer pull in opposite directions.
+- `vibe-gap-analysis` / `vibe-gap-closure-loop`: removed the hard-coded `model: sonnet`; subagents inherit the session model; autonomy follows the harness permission mode instead of "YOLO mode".
+- `vibe-parallel-task-decomposition` / `vibe-cherry-pick-integration`: use native subagents and worktree isolation; no harness-specific branch globs.
+- `vibe-pre-commit-audit`: runs the repo's hooks and secret scanners (gitleaks, trufflehog, `vibe-cli`) before manual checks.
+- `vibe-spec-sync` / `vibe-decision-journal`: no longer depend on the Claude-only `AskUserQuestion` tool.
+- `scripts/validate-skills.sh` now enforces: name == folder, spec name format, description ≤ 1024 chars, no hard-coded model names, every skill listed in `vibe-help` and README, `vibe-cli` version in sync, and consistent skill counts across all docs.
+
+### Migration
+- **Claude Code**: `/plugin marketplace update vibe-plugins`. All 29 remaining skills keep their names and invocation commands; for removed/merged skills use the table above.
+- **Codex / Gemini CLI symlink installs**: folder names changed, so remove the old symlinks in `~/.agents/skills/` and re-link (see README).
+
 ## [1.5.1] - 2026-04-13
 
 ### Fixed

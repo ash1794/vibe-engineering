@@ -20,6 +20,16 @@ Catch the easy mistakes before they enter history.
 - When the user explicitly says to skip checks
 - Auto-generated code commits (lock files, etc.)
 
+## Tools First, Eyeballing Second
+
+Pattern-matching a diff by eye misses things that a deterministic scanner catches. Before the manual checks:
+
+1. **Run what the repo already has** — `pre-commit run`, `lefthook`, `husky`, or a lint/`check` script. Check `.pre-commit-config.yaml`, `package.json`, and the `Makefile`.
+2. **Run a secret scanner** if one is installed (`gitleaks protect --staged`, `trufflehog git file://. --since-commit HEAD`) or `vibe-cli pre-commit` from this repo.
+3. **If nothing is set up**, suggest adding one (for example `vibe-cli hook install`, or a gitleaks pre-commit hook), then fall back to the manual checks below.
+
+Tool findings are blocking. The manual checks cover what the tools don't.
+
 ## Checks
 
 ### 1. Secrets & Credentials
@@ -59,9 +69,11 @@ Scan for patterns:
 ### Pre-Commit Audit
 
 **Status**: CLEAN / WARNINGS / BLOCKED
+**Tools run**: [e.g., `pre-commit run`, `gitleaks protect --staged`, or "none configured"]
 
 | Check | Status | Findings |
 |-------|--------|----------|
+| Scanner / hooks | ✓/✗/n/a | X findings |
 | Secrets | ✓/✗ | X patterns found |
 | Debug statements | ✓/✗ | X occurrences |
 | TODOs | ✓/◐ | X without references |

@@ -37,9 +37,11 @@ Large tasks are often collections of independent subtasks hiding behind a sequen
    - **Batch 1**: Tasks that depend only on Batch 0 (run after Batch 0, in parallel)
    - **Batch N**: Continue until all tasks assigned
 
-4. **Set parallelism limit** — Max 4-6 concurrent agents (beyond this, coordination overhead dominates)
+4. **Set parallelism limit** — Use the harness's native parallelism (subagents, background tasks, workflows, or cloud tasks) and respect its concurrency limits. Past a handful of concurrent streams, the integration and review cost usually outweighs the speedup, so 3–5 is a sensible default unless the tasks are trivially independent.
 
-5. **Create dispatch plan**:
+5. **Isolate** — Give each parallel stream its own worktree or branch if the harness supports isolation, so streams can't overwrite each other's files. Integrate afterwards with `vibe-cherry-pick-integration`.
+
+6. **Create dispatch plan**:
 
 ## Output Format
 

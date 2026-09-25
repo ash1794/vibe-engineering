@@ -22,9 +22,10 @@ Parallel agents produce parallel branches. This skill integrates them safely wit
 
 ## Steps
 
-1. **Inventory branches** — List all branches with completed work:
+1. **Inventory branches** — List the branches and worktrees with completed work. Harnesses name them differently, so list rather than guess a pattern:
    ```bash
-   git branch --list 'worktree-*' 'feature/*'
+   git worktree list
+   git branch --sort=-committerdate | head -20
    ```
 
 2. **Determine integration order** — Cherry-pick in dependency order:
@@ -56,8 +57,8 @@ Parallel agents produce parallel branches. This skill integrates them safely wit
 
 | Branch | Commits | Conflicts | Tests After |
 |--------|---------|-----------|------------|
-| worktree-abc | 3 | 0 | PASS |
-| worktree-def | 2 | 1 | PASS |
+| agent/auth-stream | 3 | 0 | PASS |
+| agent/api-stream | 2 | 1 | PASS |
 
 ### Conflict Resolutions
 1. [File]: [How it was resolved]

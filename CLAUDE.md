@@ -4,7 +4,7 @@ Project notes for Claude Code (and any other AI agent) working in this repo.
 
 ## What this repo is
 
-A Claude Code **marketplace** (`vibe-plugins`) that ships one **plugin** (`vibe-engineering`) containing 38 engineering-discipline skills. The same `SKILL.md` files also power OpenAI Codex via `.agents/skills/`.
+A Claude Code **marketplace** (`vibe-plugins`) that ships one **plugin** (`vibe-engineering`) containing 29 engineering-discipline skills. The same `SKILL.md` files also power OpenAI Codex and Gemini CLI via `.agents/skills/` (the Agent Skills standard path).
 
 ```
 vibe-engineering/                       # repo root = marketplace root
@@ -13,8 +13,8 @@ vibe-engineering/                       # repo root = marketplace root
 ├── plugins/
 │   └── vibe-engineering/               # plugin root
 │       ├── .claude-plugin/plugin.json  # plugin: "vibe-engineering"
-│       └── skills/                     # 38 SKILL.md files
-└── .agents/skills -> ../plugins/vibe-engineering/skills  # Codex
+│       └── skills/                     # 29 skills, folder name == `name`
+└── .agents/skills -> ../plugins/vibe-engineering/skills  # Codex + Gemini CLI
 ```
 
 Install flow users follow:
@@ -47,9 +47,12 @@ Claude Code's plugin/marketplace registries index by name. Same-name collisions 
 
 `scripts/validate-skills.sh` runs on every push and PR (`.github/workflows/validate.yml`). It checks:
 
-- SKILL.md frontmatter and required sections on all 38 skills
-- `plugin.json` version matches the plugin entry version in `marketplace.json`
-- README skill count matches the actual count
+- SKILL.md frontmatter and required sections on every skill
+- Agent Skills spec rules: `name` matches the folder, lowercase/hyphen format, `description` ≤ 1024 chars
+- No hard-coded model names in skills (`model: sonnet`, etc.)
+- Every skill is listed in the `vibe-help` router and the README catalog
+- `plugin.json` version matches `marketplace.json` and `scripts/vibe-cli`
+- Every "N skills" count (README, AGENTS.md, CLAUDE.md, manifests) matches the actual count
 - **The three invariants above** (`=== Plugin Structure Invariants ===` block)
 
 Run locally:
@@ -60,6 +63,7 @@ bash scripts/validate-skills.sh
 ## When editing this repo
 
 - **Skill edits** go in `plugins/vibe-engineering/skills/<name>/SKILL.md`
-- **New skills** must start with the `vibe-` prefix and follow the template in README
-- **Version bumps** must update `plugins/vibe-engineering/.claude-plugin/plugin.json`, `scripts/vibe-cli` (`VERSION=`), and the plugin entry in `.claude-plugin/marketplace.json` together. The validator enforces consistency between plugin.json and marketplace.json.
+- **New skills** must start with the `vibe-` prefix, live in a folder with the same name, follow the template in README, and be added to the README catalog and `vibe-help`
+- **Keep skills harness-neutral**: describe capabilities, not Claude-only tool names, and never hard-code a model. See `references/platform-tools.md`. Don't add a skill for something current models already do well unprompted.
+- **Version bumps** must update `plugins/vibe-engineering/.claude-plugin/plugin.json`, `scripts/vibe-cli` (`VERSION=`), and the plugin entry in `.claude-plugin/marketplace.json` together. The validator enforces all three.
 - **Never** move files back to the repo root. Never rename the marketplace to `vibe-engineering`. Both will fail CI.

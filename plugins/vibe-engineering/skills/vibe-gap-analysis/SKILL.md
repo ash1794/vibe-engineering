@@ -50,9 +50,9 @@ Fast, single-agent structural audit. No subagents dispatched.
 
 ### Deep (`--deep`)
 
-Full 17-dimension audit using parallel subagents. Exhaustive production readiness assessment.
+Full 17-dimension audit using parallel subagents where the harness supports them (Claude Code, Codex, and Gemini CLI all can). Without subagents, run the dimensions sequentially. Exhaustive production readiness assessment.
 
-**Dispatch parallel agents** (model: sonnet) in 3 rounds:
+**Dispatch parallel agents** in 3 rounds. Subagents inherit the session's model by default; if the harness lets you choose, a faster or cheaper tier is fine for the scanning rounds, but keep the most capable model for merging and scoring.
 
 **Round 1 — Structural (5 agents):**
 - Dim 1: Spec Compliance
@@ -91,7 +91,8 @@ Instructions:
 3. Score your dimension 0-100
 4. Return findings as structured markdown
 
-Be extremely pedantic. Question everything. Assume this is a $100M ARR product.
+Be pedantic and skeptical, and calibrate severity to this project's actual stakes.
+Report only findings you can point to with file:line evidence; mark anything inferred as "unverified".
 ```
 
 After all rounds:

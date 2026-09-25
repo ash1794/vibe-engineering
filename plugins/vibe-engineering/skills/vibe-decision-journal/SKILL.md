@@ -53,7 +53,7 @@ Use when committing or when the user says "what decisions did we make?"
    - Flag potential conflicts (same topic, different conclusion) — present both to user
    - If a new decision countermands an old one, mark the old one as `Superseded by: [new decision]`
 
-5. **Present each extracted decision** to the user for review using `AskUserQuestion`:
+5. **Present each extracted decision** to the user for review (use the harness's structured question tool if it has one; otherwise ask in plain text):
    - **Accept** — record as-is
    - **Accept with edits** — user refines the wording
    - **Not a decision** — discard (it was a refactor, not a choice)

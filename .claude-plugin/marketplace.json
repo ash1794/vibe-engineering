@@ -1,7 +1,7 @@
 {
   "name": "vibe-plugins",
   "metadata": {
-    "description": "Marketplace for vibe-engineering plugins — engineering discipline skills for Claude Code and OpenAI Codex"
+    "description": "Marketplace for vibe-engineering plugins — engineering discipline skills for Claude Code, OpenAI Codex, and Gemini CLI"
   },
   "owner": {
     "name": "Ashwin K",
@@ -11,8 +11,8 @@
     {
       "name": "vibe-engineering",
       "source": "./plugins/vibe-engineering",
-      "description": "38 engineering discipline skills — research, quality gates, testing patterns, deployment, learning, gap analysis, spec sync, and more. Extracted from real-world development.",
-      "version": "1.5.1",
+      "description": "29 engineering discipline skills — research, quality gates, reward-hacking checks, testing patterns, deployment, gap analysis, spec sync, and more. Extracted from real-world development.",
+      "version": "2.0.0",
       "author": {
         "name": "Ashwin K",
         "email": "ash1794@gmail.com"
