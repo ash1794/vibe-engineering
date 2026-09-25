@@ -10,6 +10,9 @@ SKILLS_DIR="$PLUGIN_ROOT/skills"
 PLUGIN_JSON="$PLUGIN_ROOT/.claude-plugin/plugin.json"
 MARKETPLACE_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
 README="$REPO_ROOT/README.md"
+AGENTS_MD="$REPO_ROOT/AGENTS.md"
+VIBE_CLI="$REPO_ROOT/scripts/vibe-cli"
+ROUTER="$SKILLS_DIR/vibe-help/SKILL.md"
 
 errors=0
 warnings=0
@@ -61,6 +64,36 @@ for skill_file in "${skill_dirs[@]}"; do
     warn "Skill name '$fm_name' does not start with 'vibe-' prefix"
   fi
 
+  # Agent Skills spec (read by Codex and Gemini CLI): name must match the
+  # folder name, be lowercase alphanumerics + single hyphens, <= 64 chars.
+  if [[ -n "$fm_name" ]]; then
+    if [[ "$fm_name" != "$skill_name" ]]; then
+      error "name '$fm_name' does not match folder '$skill_name' (Agent Skills spec)"
+    fi
+    if [[ ! "$fm_name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ || ${#fm_name} -gt 64 ]]; then
+      error "name '$fm_name' must be lowercase a-z0-9 with single hyphens, max 64 chars"
+    fi
+  fi
+
+  # Description length limit (Agent Skills spec)
+  fm_desc=$(echo "$frontmatter" | grep '^description:' | head -1 | sed 's/^description: *//')
+  if [[ ${#fm_desc} -gt 1024 ]]; then
+    error "description is ${#fm_desc} chars (max 1024)"
+  fi
+
+  # Skills must stay model- and harness-neutral
+  if grep -qiE 'model: *(sonnet|opus|haiku|gpt|gemini)' "$skill_file"; then
+    error "hard-coded model name — let subagents inherit the session model (see references/platform-tools.md)"
+  fi
+
+  # Every skill must be reachable from the router and listed in the README
+  if [[ -f "$ROUTER" ]] && ! grep -q "\`$fm_name\`" "$ROUTER"; then
+    error "'$fm_name' is not listed in vibe-help (router catalog)"
+  fi
+  if [[ -f "$README" ]] && ! grep -q "\`$fm_name\`" "$README"; then
+    error "'$fm_name' is not listed in README skill catalog"
+  fi
+
   echo "  OK"
 done
 
@@ -79,15 +112,29 @@ if [[ -f "$PLUGIN_JSON" && -f "$MARKETPLACE_JSON" ]]; then
   fi
 fi
 
-# Check README skill count matches actual count
-if [[ -f "$README" ]]; then
-  readme_count=$(grep -oP '\b\d+ (engineering discipline )?skills\b' "$README" | head -1 | grep -oP '^\d+')
-  if [[ -n "$readme_count" && "$readme_count" -ne "$skill_count" ]]; then
-    error "README claims $readme_count skills but found $skill_count skill directories"
+# Check vibe-cli VERSION matches plugin.json
+if [[ -f "$VIBE_CLI" && -n "${plugin_version:-}" ]]; then
+  cli_version=$(grep -m1 '^VERSION=' "$VIBE_CLI" | sed 's/^VERSION="\(.*\)"/\1/')
+  if [[ "$cli_version" != "$plugin_version" ]]; then
+    error "Version mismatch: scripts/vibe-cli=$cli_version, plugin.json=$plugin_version"
   else
-    echo "  Skill count matches: $skill_count"
+    echo "  vibe-cli version matches: $cli_version"
   fi
 fi
+
+# Check every "N skills" claim matches the actual count
+count_ok=1
+for f in "$README" "$AGENTS_MD" "$PLUGIN_JSON" "$MARKETPLACE_JSON" "$REPO_ROOT/CLAUDE.md"; do
+  [[ -f "$f" ]] || continue
+  while read -r n; do
+    [[ -z "$n" ]] && continue
+    if [[ "$n" -ne "$skill_count" ]]; then
+      error "$(basename "$f") claims $n skills but found $skill_count skill directories"
+      count_ok=0
+    fi
+  done < <(grep -oP '\b\d+(?= engineering[- ]discipline skills\b)|(?<=Skills-)\d+(?=-)|(?<=All )\d+(?= skills?\b)|\b\d+(?= skill definitions)' "$f" || true)
+done
+[[ $count_ok -eq 1 ]] && echo "  Skill count matches everywhere: $skill_count"
 
 echo
 echo "=== Plugin Structure Invariants ==="

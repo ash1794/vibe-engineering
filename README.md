@@ -3,11 +3,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/ash1794/vibe-engineering)
 [![OpenAI Codex Skills](https://img.shields.io/badge/OpenAI%20Codex-Skills-10a37f)](https://developers.openai.com/codex/skills/)
-[![Skills](https://img.shields.io/badge/Skills-38-green)](https://github.com/ash1794/vibe-engineering)
+[![Gemini CLI Skills](https://img.shields.io/badge/Gemini%20CLI-Skills-4285F4)](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md)
+[![Skills](https://img.shields.io/badge/Skills-29-green)](https://github.com/ash1794/vibe-engineering)
 
-**38 engineering discipline skills for Claude Code & OpenAI Codex + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development — not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
+**29 engineering discipline skills for Claude Code, OpenAI Codex & Gemini CLI + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development: not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
 
-> "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain.
+> "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain, and every skill was re-checked in v2.0 against what current models and agent harnesses now handle on their own.
 
 ### Two commands. Instant engineering discipline.
 
@@ -16,21 +17,25 @@
 /plugin install vibe-engineering@vibe-plugins
 ```
 
-Claude automatically discovers and applies the right skill for every task — research before design, quality gates before shipping, structured debugging before guessing, test coverage before claiming "done."
+Your agent picks the right skill from its description: research before design, quality gates before shipping, evidence before claiming "done."
 
 ## What is this?
 
-A skill collection for Claude Code and OpenAI Codex with 38 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
+A skill collection in the open [Agent Skills](https://agentskills.io) format with 29 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
 
-- **Research & Decision-Making** (5 skills) — Think before building
-- **Quality Gates & Validation** (7 skills) — Catch issues before they ship
-- **Learning & Knowledge Management** (5 skills) — Never solve the same problem twice
-- **Parallel & Multi-Agent Development** (4 skills) — Scale your work safely
-- **Testing Patterns** (5 skills) — Test what matters, not just what's easy
-- **Deployment & Operations** (4 skills) — Ship with confidence
-- **Gap Analysis & Remediation** (2 skills) — Audit and systematically close gaps
-- **Communication & Process** (4 skills) — Stay focused, stay clear
-- **Meta Skills** (2 skills) — Skill discovery and routing
+- **Research & Decision-Making** (3 skills): think before building
+- **Quality Gates & Validation** (7 skills): catch issues before they ship
+- **Knowledge & Continuity** (2 skills): never solve the same problem twice
+- **Parallel & Multi-Agent Development** (2 skills): scale your work safely
+- **Testing Patterns** (5 skills): test what matters, not just what's easy
+- **Deployment & Operations** (4 skills): ship with confidence
+- **Gap Analysis & Remediation** (2 skills): audit and systematically close gaps
+- **Process** (3 skills): stay focused, build to the right standard
+- **Meta** (1 skill): skill routing
+
+### What the skills *don't* do
+
+Modern models and harnesses already handle some things well, and a skill that duplicates them only adds noise. v2.0 removed skills for context-window management (harnesses compact automatically), output formatting (models format well by default), always-on skill bootstrapping (skills trigger from their descriptions), and private task queues (use your issue tracker). See [CHANGELOG](CHANGELOG.md#200---2026-09-25) for the full list and migration.
 
 ## Installation
 
@@ -55,11 +60,11 @@ git clone https://github.com/ash1794/vibe-engineering.git
 claude --plugin-dir ./vibe-engineering/plugins/vibe-engineering
 ```
 
-All 38 skills are now available in every Claude Code session.
+All 29 skills are now available in every Claude Code session.
 
-### OpenAI Codex
+### OpenAI Codex & Gemini CLI
 
-Clone the repo anywhere, then symlink the plugin's `skills/` directory into `.agents/skills/` so Codex can discover the individual skill folders:
+Both read skills from `.agents/skills/`, the cross-tool path in the Agent Skills standard, so one set of symlinks covers both:
 
 ```bash
 # Clone once, symlink many times
@@ -74,15 +79,18 @@ mkdir -p .agents/skills
 ln -s ~/src/vibe-engineering/plugins/vibe-engineering/skills/* .agents/skills/
 ```
 
-Codex discovers skills from `.agents/skills/` automatically. Each skill's `SKILL.md` frontmatter drives implicit matching.
+Gemini CLI also accepts `~/.gemini/skills/` and `.gemini/skills/`. Run `/skills` in Gemini CLI to confirm the skills were discovered.
+
+> **Upgrading from 1.x with symlinks?** Skill folders were renamed to match their `name` (e.g. `quality-loop/` → `vibe-quality-loop/`) and 9 skills were retired, so remove your old symlinks and re-run the `ln -s` command above.
 
 ## Quick Start
 
-After installation, Claude automatically discovers vibe-engineering skills. The bootstrap skill teaches Claude to check for applicable skills before every action.
+After installation, skills activate automatically when a task matches their description.
 
-Explore available skills interactively:
+Find the right skill:
 ```
-/vibe-engineering:vibe-help
+/vibe-engineering:vibe-help        # Claude Code
+$vibe-help                         # Codex
 ```
 
 Invoke any skill directly:
@@ -95,6 +103,8 @@ Invoke any skill directly:
 $vibe-quality-loop
 $vibe-research-before-design
 ```
+
+In Gemini CLI, skills are activated automatically from their descriptions, or you can ask for one by name.
 
 ## CLI: `vibe-cli`
 
@@ -197,7 +207,7 @@ vibe-adversarial-test-generation ──→ Generate spec-driven tests with req:I
     ↓
 vibe-coverage-enforcer ──→ Verify 3 dimensions (line + spec-to-test + spec-to-code)
     ↓
-vibe-spec-vs-code-audit ──→ Final verification: no remaining gaps
+vibe-spec-sync --audit ──→ Final verification: no remaining gaps
 ```
 
 The CLI exposes the critical parts for automation:
@@ -208,48 +218,40 @@ The CLI exposes the critical parts for automation:
 
 ## Skill Catalog
 
-### Meta Skills
+### Meta
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-using-vibe-engineering` | Every conversation start | Bootstrap: teaches Claude to check for applicable skills |
-| `vibe-help` | "What skill should I use?" | Interactive skill router and discovery |
+| `vibe-help` | "What skill should I use?" | Skill router and full catalog |
 
 ### Research & Decision-Making
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-research-before-design` | Before any new feature/architecture | SOTA research before design proposals |
-| `vibe-decision-journal` | After any architectural choice or before committing | Automatic decision extraction from diffs + manual ADR recording |
-| `vibe-devil-advocate-review` | Before shipping recommendations | 5-dimension adversarial challenge |
-| `vibe-start-informed` | Before proposing any feature/architecture | Research real projects and failures before designing |
-| `vibe-anti-rationalization-check` | When about to skip a step | Catches shortcut rationalization patterns |
+| `vibe-research-before-design` | Before any new feature/architecture/tech choice | Research real projects, papers, and documented failures, with verified sources |
+| `vibe-decision-journal` | After any architectural choice or before committing | Automatic decision extraction from diffs + ADR recording |
+| `vibe-devil-advocate-review` | Before shipping recommendations or large changes | 5-dimension challenge, ideally by a fresh context or a different model |
 
 ### Quality Gates & Validation
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-acceptance-gate` | After completing a task with criteria | PASS/FAIL validation against criteria |
-| `vibe-quality-loop` | After any non-trivial implementation | Implement→Review→Test→Fix→Loop cycle |
-| `vibe-spec-vs-code-audit` | When implementation claimed complete | Line-by-line spec compliance check |
-| `vibe-spec-sync` | Before committing or after approving decisions | Bidirectional spec-code sync with drift detection |
+| `vibe-acceptance-gate` | After completing a task with criteria | PASS/FAIL validation against criteria, with evidence |
+| `vibe-quality-loop` | After any non-trivial implementation | Review→Test→Fix loop until clean, using the repo's own checks |
+| `vibe-anti-rationalization-check` | Before claiming done; when a test is "in the way" | Catches reward hacking: test tampering, special-casing, unverified claims |
+| `vibe-spec-sync` | Before committing, or when implementation is claimed complete | Spec drift detection + approved write-back; `--audit` for full spec-vs-code check |
 | `vibe-doc-quality-gate` | After editing any technical doc | Fast 6-point document quality check |
 | `vibe-requirements-validator` | When reviewing PRD/user stories | SMART criteria validation |
 | `vibe-coverage-enforcer` | Before claiming code complete | 3-dimension coverage: line + spec-to-test + spec-to-code |
 
-### Learning & Knowledge Management
+### Knowledge & Continuity
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-reflect-and-compound` | After feedback or failed attempts | Extract patterns, update learnings |
-| `vibe-handover-doc` | End of long session | Generate session continuity document |
-| `vibe-debugging-journal` | After resolving non-trivial bugs | Persistent bug pattern recording |
-| `vibe-session-context-flush` | Context window approaching capacity | Smart context summarization |
-| `vibe-pattern-library` | Same pattern implemented 3rd time | Record and suggest established patterns |
+| `vibe-reflect-and-compound` | After feedback, a non-trivial bug, or a repeated pattern | Learnings, bug entries, and patterns written to the memory file your agent loads (CLAUDE.md / AGENTS.md / GEMINI.md) |
+| `vibe-handover-doc` | Handing off to a person, another tool, or a future session | Cold-start handover doc with resume prompt |
 
 ### Parallel & Multi-Agent Development
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-parallel-task-decomposition` | Large task with independent subtasks | DAG analysis for safe parallelism |
-| `vibe-cherry-pick-integration` | After parallel agents complete | Safe sequential integration |
-| `vibe-wave-based-remediation` | 10+ issues to fix | Prioritized batch remediation |
-| `vibe-async-task-queue` | Identifying non-blocking work | Cross-session persistent task queue |
+| `vibe-parallel-task-decomposition` | Large task with independent subtasks | DAG analysis and dispatch plan for the harness's native subagents |
+| `vibe-cherry-pick-integration` | After parallel agents complete | Safe sequential integration of branches/worktrees |
 
 ### Testing Patterns
 | Skill | Trigger | Purpose |
@@ -263,54 +265,54 @@ The CLI exposes the critical parts for automation:
 ### Deployment & Operations
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
+| `vibe-pre-commit-audit` | Before creating a commit | Runs hooks/secret scanners first, then checks for secrets, debug code, TODOs |
 | `vibe-safe-deploy` | Before any deployment | Pre-flight checks, atomic deploy, rollback |
-| `vibe-pre-commit-audit` | Before creating a commit | Secrets, TODOs, debug statements scan |
-| `vibe-service-health-dashboard` | Checking running services | Multi-service health monitoring |
 | `vibe-rollback-plan` | Before risky changes | Documented rollback runbook |
+| `vibe-service-health-dashboard` | Checking running services | Multi-service health monitoring |
 
 ### Gap Analysis & Remediation
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
 | `vibe-gap-analysis` | Before production launch or after major refactor | 17-dimension production readiness audit with parallel agents |
-| `vibe-gap-closure-loop` | After gap analysis with 10+ findings | Autonomous loop: dependency analysis → parallel fix agents → test gate → repeat |
+| `vibe-gap-closure-loop` | 10+ findings, bugs, or audit items | Prioritized waves → parallel fix streams → test gate → re-audit |
 
-### Communication & Process
+### Process
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `vibe-structured-output` | Producing analysis or reports | Enforced Executive Summary format |
+| `vibe-scope-guard` | During implementation | Scope creep and over-engineering detection |
+| `vibe-production-mindset` | Before declaring a production feature done | Production hardening checklist, scaled to real stakes |
 | `vibe-iteration-review` | End of development iteration | Quality grading and trend analysis |
-| `vibe-scope-guard` | During implementation | Scope creep detection and redirection |
-| `vibe-production-mindset` | Starting any implementation | "1 million users" quality check |
 
 ## Why vibe-engineering?
 
-Without discipline skills, AI coding assistants make the same mistakes humans do — skip research, ship without tests, rationalize shortcuts, lose context across sessions. **vibe-engineering catches these patterns automatically.**
+AI coding agents are far more capable than they were a year ago, but some failure modes persist: satisfying the test instead of the goal, over-building, claiming "done" without evidence, and agreeing with their own first idea. **vibe-engineering targets exactly those.**
 
 | Without | With vibe-engineering |
 |---------|----------------------|
-| "Let me just build it" | Research existing solutions first (`vibe-research-before-design`) |
+| "Let me just build it" | Research existing solutions and their failures first (`vibe-research-before-design`) |
 | "Tests pass, ship it" | Check coverage standards are met (`vibe-coverage-enforcer`) |
 | "I'll remember the decision" | Extract it automatically from diffs (`vibe-decision-journal`) |
-| "Good enough" | Loop until clean (`vibe-quality-loop`) |
+| "Good enough" | Loop until clean, with evidence (`vibe-quality-loop`) |
 | "Spec is probably still accurate" | Detect drift and sync back (`vibe-spec-sync`) |
-| "This is simple, no need for..." | Catch rationalization in real-time (`vibe-anti-rationalization-check`) |
-| Debug by guessing | Systematic root cause analysis (`vibe-debugging-journal`) |
-| Context lost between sessions | Auto-generated handover docs (`vibe-handover-doc`) |
+| Test loosened until it passed | Caught and disclosed (`vibe-anti-rationalization-check`) |
+| Same bug investigated twice | Root cause saved to the agent's memory file (`vibe-reflect-and-compound`) |
+| Self-review that agrees with itself | Review by a fresh context or another model (`vibe-devil-advocate-review`) |
 
 ## Design Principles
 
-1. **Born from pain, not theory** — Every skill exists because skipping it caused real problems
-2. **When to use AND when NOT to use** — Every skill has explicit triggers and anti-triggers
-3. **Composable** — Skills work independently or together
-4. **Advisory first, enforcement when it matters** — Skills guide; CLI enforces in CI/CD
-5. **Cross-project** — No project-specific assumptions. Works with any language/framework
+1. **Born from pain, not theory**: every skill exists because skipping it caused real problems
+2. **Don't duplicate the model**: if current models or harnesses already do it well, it's not a skill
+3. **When to use AND when NOT to use**: every skill has explicit triggers and anti-triggers
+4. **Harness-neutral**: skills describe capabilities, not one tool's API, and never hard-code a model (see [`references/platform-tools.md`](references/platform-tools.md))
+5. **Composable**: skills work independently or together
+6. **Advisory first, enforcement when it matters**: skills guide; the CLI enforces in CI/CD
 
 ## How It Works
 
-The repo is a Claude Code **marketplace** (`vibe-plugins`) that ships one plugin (`vibe-engineering`), which doubles as a Codex skill collection. The same `SKILL.md` files are consumed by both platforms:
+The repo is a Claude Code **marketplace** (`vibe-plugins`) that ships one plugin (`vibe-engineering`), whose `skills/` directory is also a standard Agent Skills collection for Codex and Gemini CLI:
 
 - **Claude Code**: `.claude-plugin/marketplace.json` at the repo root catalogs the plugin; the plugin itself lives in `plugins/vibe-engineering/` with its own `.claude-plugin/plugin.json`
-- **Codex**: `.agents/skills/` symlinks into the plugin's `skills/` directory; Codex discovers skills from this standard path
+- **Codex & Gemini CLI**: `.agents/skills/` symlinks into the plugin's `skills/` directory; both discover skills from this standard path
 
 ```
 vibe-engineering/                          # repo root = marketplace root
@@ -319,18 +321,17 @@ vibe-engineering/                          # repo root = marketplace root
 ├── plugins/
 │   └── vibe-engineering/                  # plugin root
 │       ├── .claude-plugin/plugin.json     # plugin: "vibe-engineering"
-│       └── skills/                        # 38 skill definitions
+│       └── skills/                        # 29 skill definitions
 │           ├── vibe-help/SKILL.md
-│           ├── quality-loop/SKILL.md
-│           ├── spec-sync/SKILL.md
-│           ├── decision-journal/SKILL.md
-│           ├── gap-analysis/SKILL.md
-│           └── ... (33 more)
+│           ├── vibe-quality-loop/SKILL.md
+│           ├── vibe-spec-sync/SKILL.md
+│           └── ... (folder name == skill name)
 ├── .agents/
-│   └── skills → ../plugins/vibe-engineering/skills  # Codex discovery (symlink)
-├── AGENTS.md                              # Codex project instructions
+│   └── skills → ../plugins/vibe-engineering/skills  # Codex + Gemini CLI discovery
+├── AGENTS.md                              # Codex / cross-tool project instructions
+├── GEMINI.md                              # Gemini CLI project instructions (imports AGENTS.md)
 ├── references/
-│   └── codex-tools.md                     # Tool name mapping across platforms
+│   └── platform-tools.md                  # Capability mapping across Claude Code, Codex, Gemini CLI
 ├── scripts/
 │   ├── vibe-cli                           # CLI for CI/CD enforcement
 │   └── validate-skills.sh                 # Skill file validator
@@ -338,21 +339,23 @@ vibe-engineering/                          # repo root = marketplace root
 ```
 
 Each skill has:
-- **YAML frontmatter** with name, description, and invocation config
-- **When to Use** — explicit triggers
-- **When NOT to Use** — anti-triggers to prevent misapplication
-- **Steps** — the actual workflow
-- **Output Format** — structured output template
+- **YAML frontmatter** with `name` (matching its folder) and `description`
+- **When to Use**: explicit triggers
+- **When NOT to Use**: anti-triggers to prevent misapplication
+- **Steps**: the actual workflow
+- **Output Format**: structured output template
 
 ## Contributing
 
 Found a pattern that keeps saving you? Turn it into a skill:
 
 1. Fork this repo
-2. Create `plugins/vibe-engineering/skills/your-skill-name/SKILL.md`
-3. Follow the template (see any existing skill)
-4. Include: When to Use, When NOT to Use, Steps, Output Format
-5. Submit a PR
+2. Create `plugins/vibe-engineering/skills/vibe-your-skill-name/SKILL.md` (the folder name must equal `name`)
+3. Follow the template below and the portability rules in [`references/platform-tools.md`](references/platform-tools.md)
+4. Add it to the catalog in this README and in `vibe-help`
+5. Run `bash scripts/validate-skills.sh`, then submit a PR
+
+Before adding a skill, ask: *would a current frontier model do this well without being told?* If yes, it isn't a skill.
 
 ### Skill Template
 
@@ -389,8 +392,8 @@ These skills were extracted from building an 11-agent personal assistant system 
 
 **The numbers:**
 - 50+ session observations analyzed (310k+ tokens of development history)
-- 15 project-specific skills generalized into 38 universal patterns
-- 3 weeks of intensive multi-agent development
+- 15 project-specific skills generalized into 38 universal patterns (v1.x)
+- Consolidated to 29 in v2.0 after re-auditing each one against current Claude, GPT, and Gemini models
 - Every skill represents a pattern that emerged from real pain — not a theoretical best practice document
 
 ## Also Check Out
