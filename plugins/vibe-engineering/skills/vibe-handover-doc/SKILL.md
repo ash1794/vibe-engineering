@@ -35,7 +35,20 @@ Within one session, the harness handles continuity: context compaction, session 
 
 4. **Write a resume prompt** — A self-contained prompt the next session can be started with: branch, files to read first, the next concrete task, and how to verify it.
 
-5. **Save** to `docs/handover/YYYY-MM-DD-<topic>.md` (or `docs/HANDOVER.md` for a single rolling doc), and commit it if the next reader will work from a fresh clone.
+5. **Order it current-state-first.** The top of the doc is what the next reader acts on. Move superseded plans and history to the bottom or to a separate file; a resume file that grows into a history slows every pickup.
+
+6. **Save** to `docs/handover/YYYY-MM-DD-<topic>.md` (or `docs/HANDOVER.md` for a single rolling doc), and commit it if the next reader will work from a fresh clone.
+
+## Wind-Down Mode (usage limit, restart, or "stop for now")
+
+When a session must stop mid-work, especially with agents running:
+1. Stop or message running agents to reach a safe point
+2. Commit what passes its checks; stash or commit half-done edits to a clearly named WIP branch or stash, and record where
+3. Record CI state per pushed commit
+4. Write the handover with exact resume steps (a `CONTINUE.md` at the root works well)
+5. Put the resume convention in the project instructions file, for example "on 'continue', re-read CONTINUE.md and resume from the first unfinished step"
+
+When the owner says pause ("just note it down"), write the note and plan, then stop. Don't keep building.
 
 ## Output Format
 

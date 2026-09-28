@@ -1,6 +1,6 @@
 # vibe-engineering
 
-29 engineering discipline skills for AI-assisted development. Works with Claude Code, OpenAI Codex, and Gemini CLI.
+32 engineering discipline skills for AI-assisted development. Works with Claude Code, OpenAI Codex, and Gemini CLI.
 
 ## Skills
 
@@ -33,7 +33,7 @@ Skills describe capabilities ("run the tests", "dispatch a subagent", "ask the u
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog (`vibe-plugins`) |
 | `plugins/vibe-engineering/.claude-plugin/plugin.json` | Claude Code plugin manifest |
-| `plugins/vibe-engineering/skills/` | All 29 skill definitions |
+| `plugins/vibe-engineering/skills/` | All 32 skill definitions |
 | `.agents/skills/` | Symlink for Codex and Gemini CLI discovery |
 | `scripts/vibe-cli` | CI/CD enforcement CLI |
 | `references/platform-tools.md` | Capability mapping across agents |

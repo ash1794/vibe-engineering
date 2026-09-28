@@ -57,6 +57,14 @@ Before running the checklist, establish the stakes and the conventions:
 - [ ] Goroutines, threads, and tasks have bounded lifetimes
 - [ ] No unbounded in-memory growth (caches, queues, buffers)
 
+### 6. Performance Budgets (when performance is a requirement)
+- [ ] Budgets are targets from the spec (published thresholds, competitor medians), not today's measurement plus a margin
+- [ ] Named profiles: a constrained one for CI (slow link, throttled CPU) and a typical target device
+- [ ] Per-route or per-endpoint budgets: payload sizes (JS, CSS, HTML, fonts, total) and timings (e.g., LCP, CLS, TBT, p95 latency)
+- [ ] Overrides carry a written `reason`; raising a default requires a spec change
+- [ ] Enforced in CI; a failing budget is fixed in code, never raised to pass
+- [ ] Performance changes report "no budgets loosened", and call out mechanical key renames so they aren't mistaken for loosening
+
 ## Steps
 
 1. **Calibrate** (above)
@@ -77,6 +85,7 @@ Before running the checklist, establish the stakes and the conventions:
 | Input Validation | ✓/◐/✗/n/a | [count] |
 | Graceful Degradation | ✓/◐/✗/n/a | [count] |
 | Resource Management | ✓/◐/✗/n/a | [count] |
+| Performance Budgets | ✓/◐/✗/n/a | [count] |
 
 ### Critical Gaps
 1. [gap with file:line and the fix]

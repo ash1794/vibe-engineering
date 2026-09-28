@@ -19,6 +19,7 @@ Catch the easy mistakes before they enter history.
 - Commits to personal scratch branches
 - When the user explicitly says to skip checks
 - Auto-generated code commits (lock files, etc.)
+- Private or draft content leaking through built output (use `vibe-publication-leak-guard`)
 
 ## Tools First, Eyeballing Second
 

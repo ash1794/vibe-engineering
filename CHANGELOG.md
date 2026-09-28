@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-28
+
+Three skills and five extensions drawn from a three-day, multi-agent production build (124 agents, eight parallel workstreams, CI performance and leak gates). Where a pattern fit an existing skill, it was folded in rather than added as a new skill. **29 → 32 skills.**
+
+### Added
+- `vibe-workstream-orchestration`: orchestrator-only main thread; a few long-lived workstreams, each owning a file area in its own worktree; follow-ups routed to the owner instead of spawning one-task agents; base-SHA recording, rebase-before-commit, stale-checkout detection, and shared-machine hygiene (private ports, load recorded with measurements).
+- `vibe-publication-leak-guard`: two-tier scan of *built output* (HTML, component payloads, JS/CSS chunks, static routes, `public/`); `needsOk` drafts visible in preview and absent in production; denylist held outside the repo; and a human-owned approval ledger that agents read but never write.
+- `vibe-flake-root-cause`: "flaky" is a hypothesis. Isolate, force the controlling variable, reproduce at a stated rate, fix the cause, and prove it with counts. No retry-to-green, no widened thresholds.
+
+### Changed
+- `vibe-devil-advocate-review`: **panel mode**, with parallel review lenses on a frozen head, a separate verification stage that drops stale or false findings, and routing to file owners.
+- `vibe-safe-deploy`: **deploy provenance**. The SHA is served at a version endpoint and polled after deploy, preview and production are split, and deploy credentials get least privilege.
+- `vibe-handover-doc`: **wind-down mode** for usage limits and restarts (stop agents, commit what passes, stash the rest, CI per commit, resume convention), plus current-state-first ordering.
+- `vibe-production-mindset`: **performance budgets** as spec targets with named profiles, per-route budgets, reasoned overrides, and "never loosened to pass".
+- `vibe-anti-rationalization-check`: new patterns for budget loosening, "it's flaky", and self-approval.
+- Cross-references from `vibe-parallel-task-decomposition` and `vibe-pre-commit-audit`; `vibe-help` routes to the new skills.
+
+### Not added (deliberately)
+- A separate multi-lens review skill and a separate human-approval skill (folded into the skills above), persona/journey framing (current models handle it when asked), and project-specific rules such as easter-egg checks.
+
 ## [2.0.0] - 2026-09-25
 
 Every skill was re-audited against current Claude, GPT (Codex), and Gemini models and their agent harnesses. Skills that duplicate what the model or harness now does well were retired, overlapping skills were merged, and the rest were updated to be model- and harness-neutral. **38 → 29 skills.**

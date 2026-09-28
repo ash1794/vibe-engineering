@@ -32,6 +32,9 @@ Current models rarely skip work out of laziness. The failure that remains is sub
 | Mocking away the subject | Mocking the very function the test is supposed to exercise | Mock only external boundaries. |
 | Silent scope cut | Implementing 4 of 5 requirements and summarizing as "done" | Finish, or list exactly what is missing. |
 | Unverified claim | "This should fix it" / "Tests pass" without running them | Run the command and quote the result. |
+| Budget loosening | Raising a performance/size budget or threshold because the check failed | Fix the code; changing a budget needs a spec change and a stated reason |
+| "It's flaky" | Re-running until green, adding a retry | Find the variable (`vibe-flake-root-cause`) |
+| Self-approval | Recording a human's approval on their behalf, or treating a code comment as sign-off | Point the human to the item to approve (`vibe-publication-leak-guard`) |
 | Error swallowing | `catch {}` / `except: pass` to stop a crash | Handle the specific error, or let it surface. |
 | Deferred forever | "I'll add that later" with no tracked follow-up | Do it now, or create a tracked issue/TODO with a reference. |
 
