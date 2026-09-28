@@ -1,6 +1,6 @@
 ---
 name: vibe-safe-deploy
-description: Performs deployment with pre-flight checks, atomic replacement, post-deploy verification, and automatic rollback. Use before any deployment to staging or production.
+description: Performs deployment with pre-flight checks, atomic replacement, post-deploy verification, provenance (proving the environment serves the exact commit you pushed), and automatic rollback. Use before any deployment to staging, preview, or production.
 user-invocable: true
 ---
 
@@ -59,14 +59,20 @@ Before deploying, verify:
    # Restart services with previous version
    ```
 
-6. **Report status**: success / failed / rolled-back
+6. **Verify provenance.** "Deploy succeeded" means a job finished, not that the new build is being served.
+   - Bake the commit SHA into the build or image and serve it at a version endpoint (for example `/version.txt`)
+   - After deploy, poll that endpoint until it returns the expected SHA; on timeout, fail and report the SHA it actually served
+   - Keep environments separate: branch pushes deploy preview (behind auth, `noindex`), and only the main branch deploys production
+   - Give the deploy credential the least privilege that works (for example a forced-command SSH key that accepts only `<environment> <sha>`)
+
+7. **Report status**: success / failed / rolled-back
 
 ## Output Format
 
 ### Deployment Report
 
 **Status**: SUCCESS / FAILED / ROLLED_BACK
-**Version**: [version or commit hash]
+**Version**: [version or commit hash] · **Served SHA**: [value from version endpoint]
 **Duration**: [time]
 
 | Step | Status | Duration |

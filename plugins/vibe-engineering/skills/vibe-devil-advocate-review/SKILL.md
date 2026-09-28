@@ -1,6 +1,6 @@
 ---
 name: vibe-devil-advocate-review
-description: Challenges a recommendation, design, or large change across 5 dimensions (consistency, completeness, actionability, alignment, risk), ideally from a fresh context or a different model. Use before shipping a significant recommendation, design document, or large feature branch.
+description: Challenges a recommendation, design, or large change across 5 dimensions (consistency, completeness, actionability, alignment, risk), ideally from a fresh context or a different model. Panel mode runs several independent lenses in parallel on a release candidate, verifies every finding against the current head, and routes confirmed ones to file owners. Use before shipping a significant recommendation, design, large branch, or multi-agent release.
 user-invocable: true
 ---
 
@@ -47,6 +47,17 @@ Give the reviewer the artifact, the goals and constraints, and this skill's 5 di
 3. **Verify each issue** — Keep only issues you can support with evidence (a quote, `file:line`, or a concrete failure scenario). Drop the ones you can't. Padding the list with speculative issues is as unhelpful as rubber-stamping.
 4. **Score** each dimension 1–5 (1 = critical issues, 5 = solid)
 5. **Verdict**: APPROVE / REVISE (with required changes) / REJECT (with blocking issues)
+
+## Panel Mode (release candidates built by several agents)
+
+One reviewer carries one set of blind spots, and unverified findings waste fix cycles. For a release or content lock:
+1. **Freeze a head.** Every lens reviews the same commit.
+2. **Run lenses in parallel**, each with a narrow brief and a bounded report format (`file:line`, severity). Pick lenses that fit the product, for example: editorial and tone, facts and privacy, UX and accessibility, engineering and performance.
+3. **Verify separately.** A distinct stage reproduces each finding on the current head and drops stale or false ones (already fixed, or a rule firing on text that already complies).
+4. **Dedupe and rank** P0–P2 across lenses.
+5. **Route** each confirmed finding to the owner of the file (`vibe-workstream-orchestration`), then re-run only the affected lenses.
+
+If the harness supports scripted workflows, run the panel as one: it verifies more rigorously than routing findings by hand.
 
 ## Output Format
 

@@ -31,11 +31,12 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 
 ### "I need to fix bugs / issues"
 → 1–5 bugs: fix directly, then `vibe-reflect-and-compound` for any non-trivial one
+→ Intermittent / "flaky" failure: `vibe-flake-root-cause`
 → 10+ bugs or findings: `vibe-gap-closure-loop`
 → Prevent recurrence: `vibe-adversarial-test-generation`
 
 ### "I'm reviewing code, a design, or docs"
-→ Design or large change: `vibe-devil-advocate-review`
+→ Design or large change: `vibe-devil-advocate-review` (panel mode for multi-agent release candidates)
 → Spec compliance: `vibe-spec-sync --audit`
 → Docs: `vibe-doc-quality-gate` · Requirements: `vibe-requirements-validator`
 
@@ -47,10 +48,12 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 ### "I'm committing, deploying, or shipping"
 → Commit: `vibe-pre-commit-audit`, `vibe-spec-sync`
 → Deploy: `vibe-safe-deploy` · Risky change: `vibe-rollback-plan`
+→ Publishing drafted or privately sourced content: `vibe-publication-leak-guard`
 → Running services: `vibe-service-health-dashboard`
 
 ### "I have a lot of parallel work"
-→ Plan: `vibe-parallel-task-decomposition` → Integrate: `vibe-cherry-pick-integration`
+→ One-shot fan-out: `vibe-parallel-task-decomposition` → Integrate: `vibe-cherry-pick-integration`
+→ Multi-phase project with long-lived agents: `vibe-workstream-orchestration`
 
 ### "Is this production-ready?"
 → Audit: `vibe-gap-analysis` → Close gaps: `vibe-gap-closure-loop`
@@ -60,7 +63,7 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 
 ### "I want to capture what just happened"
 → Learnings, bugs, patterns: `vibe-reflect-and-compound`
-→ Handing off to a person or another tool: `vibe-handover-doc`
+→ Handing off, or winding down at a usage limit: `vibe-handover-doc`
 → End of sprint: `vibe-iteration-review`
 
 ### "Am I actually done?"
@@ -73,9 +76,9 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 | Research & decisions | `vibe-research-before-design`, `vibe-decision-journal`, `vibe-devil-advocate-review` |
 | Quality gates | `vibe-acceptance-gate`, `vibe-quality-loop`, `vibe-anti-rationalization-check`, `vibe-spec-sync`, `vibe-doc-quality-gate`, `vibe-requirements-validator`, `vibe-coverage-enforcer` |
 | Knowledge & continuity | `vibe-reflect-and-compound`, `vibe-handover-doc` |
-| Parallel work | `vibe-parallel-task-decomposition`, `vibe-cherry-pick-integration` |
-| Testing | `vibe-scenario-matrix`, `vibe-adversarial-test-generation`, `vibe-fuzz-parser-inputs`, `vibe-golden-file-testing`, `vibe-concurrent-test-safety` |
-| Deployment & ops | `vibe-pre-commit-audit`, `vibe-safe-deploy`, `vibe-rollback-plan`, `vibe-service-health-dashboard` |
+| Parallel work | `vibe-parallel-task-decomposition`, `vibe-workstream-orchestration`, `vibe-cherry-pick-integration` |
+| Testing | `vibe-scenario-matrix`, `vibe-adversarial-test-generation`, `vibe-fuzz-parser-inputs`, `vibe-golden-file-testing`, `vibe-concurrent-test-safety`, `vibe-flake-root-cause` |
+| Deployment & ops | `vibe-pre-commit-audit`, `vibe-publication-leak-guard`, `vibe-safe-deploy`, `vibe-rollback-plan`, `vibe-service-health-dashboard` |
 | Gap analysis | `vibe-gap-analysis`, `vibe-gap-closure-loop` |
 | Process | `vibe-scope-guard`, `vibe-production-mindset`, `vibe-iteration-review` |
 | Meta | `vibe-help` |

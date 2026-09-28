@@ -4,7 +4,7 @@ Project notes for Claude Code (and any other AI agent) working in this repo.
 
 ## What this repo is
 
-A Claude Code **marketplace** (`vibe-plugins`) that ships one **plugin** (`vibe-engineering`) containing 29 engineering-discipline skills. The same `SKILL.md` files also power OpenAI Codex and Gemini CLI via `.agents/skills/` (the Agent Skills standard path).
+A Claude Code **marketplace** (`vibe-plugins`) that ships one **plugin** (`vibe-engineering`) containing 32 engineering-discipline skills. The same `SKILL.md` files also power OpenAI Codex and Gemini CLI via `.agents/skills/` (the Agent Skills standard path).
 
 ```
 vibe-engineering/                       # repo root = marketplace root
@@ -13,7 +13,7 @@ vibe-engineering/                       # repo root = marketplace root
 ├── plugins/
 │   └── vibe-engineering/               # plugin root
 │       ├── .claude-plugin/plugin.json  # plugin: "vibe-engineering"
-│       └── skills/                     # 29 skills, folder name == `name`
+│       └── skills/                     # 32 skills, folder name == `name`
 └── .agents/skills -> ../plugins/vibe-engineering/skills  # Codex + Gemini CLI
 ```
 
