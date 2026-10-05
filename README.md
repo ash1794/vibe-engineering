@@ -4,6 +4,7 @@
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blueviolet)](https://github.com/ash1794/vibe-engineering)
 [![OpenAI Codex Skills](https://img.shields.io/badge/OpenAI%20Codex-Skills-10a37f)](https://developers.openai.com/codex/skills/)
 [![Gemini CLI Skills](https://img.shields.io/badge/Gemini%20CLI-Skills-4285F4)](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md)
+[![Release](https://img.shields.io/github/v/release/ash1794/vibe-engineering)](https://github.com/ash1794/vibe-engineering/releases/latest)
 [![Skills](https://img.shields.io/badge/Skills-32-green)](https://github.com/ash1794/vibe-engineering)
 
 **32 engineering discipline skills for Claude Code, OpenAI Codex & Gemini CLI + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development: not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
@@ -18,6 +19,14 @@
 ```
 
 Your agent picks the right skill from its description: research before design, quality gates before shipping, evidence before claiming "done."
+
+## What's new in v2.1
+
+- **3 new skills** from a multi-agent production build: `vibe-workstream-orchestration` (long-lived workstreams routed by an orchestrator that doesn't build), `vibe-publication-leak-guard` (scan built output so private and draft material stays out of production), and `vibe-flake-root-cause` (turn "flaky" into a reproduction).
+- **Extended skills**: panel mode for `vibe-devil-advocate-review`, deploy provenance for `vibe-safe-deploy`, wind-down mode for `vibe-handover-doc`, and performance budgets for `vibe-production-mindset`.
+- **v2.0** re-audited every skill against current Claude, GPT, and Gemini models and consolidated 38 skills into 29. If you're upgrading from v1.x, read the [migration notes](CHANGELOG.md#200---2026-09-25).
+
+Full history: [CHANGELOG](CHANGELOG.md) · [Releases](https://github.com/ash1794/vibe-engineering/releases)
 
 ## What is this?
 

@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [2.1.0] - 2026-09-28
 
 Three skills and five extensions drawn from a three-day, multi-agent production build (124 agents, eight parallel workstreams, CI performance and leak gates). Where a pattern fit an existing skill, it was folded in rather than added as a new skill. **29 → 32 skills.**
@@ -80,6 +82,7 @@ Every skill was re-audited against current Claude, GPT (Codex), and Gemini model
 - `.agents/skills` symlink repointed to `../plugins/vibe-engineering/skills` so Codex discovery still works.
 - README install instructions rewritten to the correct `/plugin marketplace add` + `/plugin install` syntax. The old `claude plugin add github:...` command never existed.
 - `scripts/validate-skills.sh` updated for the new layout.
+- `scripts/validate-skills.sh` now enforces the three plugin structure invariants (root `marketplace.json`, plugin in a subdirectory, distinct marketplace/plugin names), so CI fails on any change that would reintroduce #1.
 
 ### Install
 
@@ -159,3 +162,11 @@ Every skill was re-audited against current Claude, GPT (Codex), and Gemini model
 - Claude Code plugin format with plugin.json manifest
 - Marketplace distribution support via marketplace.json
 - MIT license
+
+[Unreleased]: https://github.com/ash1794/vibe-engineering/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/ash1794/vibe-engineering/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/ash1794/vibe-engineering/compare/v1.5.1...v2.0.0
+[1.5.1]: https://github.com/ash1794/vibe-engineering/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/ash1794/vibe-engineering/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/ash1794/vibe-engineering/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/ash1794/vibe-engineering/releases/tag/v1.3.0
