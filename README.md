@@ -220,10 +220,10 @@ vibe-spec-sync --audit ──→ Final verification: no remaining gaps
 ```
 
 The CLI exposes the critical parts for automation:
-- `vibe decisions` → extract decisions from staged changes
-- `vibe spec-drift` → detect spec-code drift
-- `vibe coverage` → verify all coverage dimensions
-- `vibe pre-commit` → block commits with secrets/debug code
+- `vibe-cli decisions` → extract decisions from staged changes
+- `vibe-cli spec-drift` → detect spec-code drift
+- `vibe-cli coverage` → verify all coverage dimensions
+- `vibe-cli pre-commit` → block commits with secrets/debug code
 
 ## Skill Catalog
 
@@ -341,12 +341,14 @@ vibe-engineering/                          # repo root = marketplace root
 ├── .agents/
 │   └── skills → ../plugins/vibe-engineering/skills  # Codex + Gemini CLI discovery
 ├── AGENTS.md                              # Codex / cross-tool project instructions
+├── CLAUDE.md                              # Claude Code project instructions (repo invariants)
 ├── GEMINI.md                              # Gemini CLI project instructions (imports AGENTS.md)
 ├── references/
 │   └── platform-tools.md                  # Capability mapping across Claude Code, Codex, Gemini CLI
 ├── scripts/
 │   ├── vibe-cli                           # CLI for CI/CD enforcement
 │   └── validate-skills.sh                 # Skill file validator
+├── CHANGELOG.md
 └── README.md
 ```
 
