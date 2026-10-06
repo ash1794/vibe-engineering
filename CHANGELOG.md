@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-06
+
+Two external skills reviewed against the catalog. One overlapped an existing skill and was folded in; the other covered ground nothing here did. **32 → 33 skills.**
+
+### Added
+- `vibe-slop-filter`: strips AI-generation tells from prose before it ships. Counts first (keyword saturation, em-dashes, bolded thesis lines, listicle items, "not X, it's Y" antithesis, filler vocabulary, anaphora runs) because a read-through normalizes tics, then applies a "doing work or reflex?" test per instance. Includes an explicit "what is NOT slop" list so the pass doesn't flatten genuine voice, and a re-count to catch over-correction.
+
+### Changed
+- `vibe-devil-advocate-review`: folded in adversarial-review.
+  - **Expert peg**: review from the standards of a named senior expert in the artifact's domain (principal engineer, design lead, policy veteran, field referee, senior educator). Scope widened from engineering changes to any artifact submitted for hard critique.
+  - **Search like a pessimist, report like a scientist**: assume defects exist while searching; report only what survives evidence.
+  - Read the whole artifact before critiquing (cross-document findings), order findings structural → conceptual → domain-specific → cosmetic, and ask what the artifact actually is versus what it presents as.
+  - Genuine strengths named in one line (new "What Holds Up" output section); never manufactured.
+  - A self-check gate before sending, plus delivery rules: lead with the hardest finding, no reassuring close, hand back when the user will add their own read.
+- `vibe-help` routes "tear this apart" requests and machine-sounding prose.
+
+### Not added (deliberately)
+- A separate `vibe-adversarial-review` skill. It would have duplicated `vibe-devil-advocate-review`'s trigger and purpose; two review skills with overlapping descriptions make skill selection less reliable.
+
 ## [2.1.0] - 2026-09-28
 
 Three skills and five extensions drawn from a three-day, multi-agent production build (124 agents, eight parallel workstreams, CI performance and leak gates). Where a pattern fit an existing skill, it was folded in rather than added as a new skill. **29 → 32 skills.**
@@ -163,7 +182,8 @@ Every skill was re-audited against current Claude, GPT (Codex), and Gemini model
 - Marketplace distribution support via marketplace.json
 - MIT license
 
-[Unreleased]: https://github.com/ash1794/vibe-engineering/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/ash1794/vibe-engineering/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/ash1794/vibe-engineering/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/ash1794/vibe-engineering/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/ash1794/vibe-engineering/compare/v1.5.1...v2.0.0
 [1.5.1]: https://github.com/ash1794/vibe-engineering/compare/v1.5.0...v1.5.1

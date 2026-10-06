@@ -38,7 +38,9 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 ### "I'm reviewing code, a design, or docs"
 → Design or large change: `vibe-devil-advocate-review` (panel mode for multi-agent release candidates)
 → Spec compliance: `vibe-spec-sync --audit`
+→ "Tear this apart" (any artifact, any domain): `vibe-devil-advocate-review`
 → Docs: `vibe-doc-quality-gate` · Requirements: `vibe-requirements-validator`
+→ Prose that reads as machine-written: `vibe-slop-filter`
 
 ### "I need to test something"
 → Planning: `vibe-scenario-matrix` · Coverage: `vibe-coverage-enforcer`
@@ -74,7 +76,7 @@ Ask what the user is trying to do (unless it's already clear), then recommend **
 | Area | Skills |
 |------|--------|
 | Research & decisions | `vibe-research-before-design`, `vibe-decision-journal`, `vibe-devil-advocate-review` |
-| Quality gates | `vibe-acceptance-gate`, `vibe-quality-loop`, `vibe-anti-rationalization-check`, `vibe-spec-sync`, `vibe-doc-quality-gate`, `vibe-requirements-validator`, `vibe-coverage-enforcer` |
+| Quality gates | `vibe-acceptance-gate`, `vibe-quality-loop`, `vibe-anti-rationalization-check`, `vibe-spec-sync`, `vibe-doc-quality-gate`, `vibe-requirements-validator`, `vibe-coverage-enforcer`, `vibe-slop-filter` |
 | Knowledge & continuity | `vibe-reflect-and-compound`, `vibe-handover-doc` |
 | Parallel work | `vibe-parallel-task-decomposition`, `vibe-workstream-orchestration`, `vibe-cherry-pick-integration` |
 | Testing | `vibe-scenario-matrix`, `vibe-adversarial-test-generation`, `vibe-fuzz-parser-inputs`, `vibe-golden-file-testing`, `vibe-concurrent-test-safety`, `vibe-flake-root-cause` |

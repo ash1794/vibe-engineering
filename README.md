@@ -5,9 +5,9 @@
 [![OpenAI Codex Skills](https://img.shields.io/badge/OpenAI%20Codex-Skills-10a37f)](https://developers.openai.com/codex/skills/)
 [![Gemini CLI Skills](https://img.shields.io/badge/Gemini%20CLI-Skills-4285F4)](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/skills.md)
 [![Release](https://img.shields.io/github/v/release/ash1794/vibe-engineering)](https://github.com/ash1794/vibe-engineering/releases/latest)
-[![Skills](https://img.shields.io/badge/Skills-32-green)](https://github.com/ash1794/vibe-engineering)
+[![Skills](https://img.shields.io/badge/Skills-33-green)](https://github.com/ash1794/vibe-engineering)
 
-**32 engineering discipline skills for Claude Code, OpenAI Codex & Gemini CLI + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development: not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
+**33 engineering discipline skills for Claude Code, OpenAI Codex & Gemini CLI + a CLI for CI/CD enforcement.** Extracted from real-world multi-agent system development: not theoretical best practices, but patterns that survived 3 weeks of intensive production development with 205+ test files, 11 agents, and 50+ session observations.
 
 > "Vibe coding" meets engineering rigor. Every skill here exists because skipping it caused real pain, and every skill was re-checked in v2.0 against what current models and agent harnesses now handle on their own.
 
@@ -20,20 +20,23 @@
 
 Your agent picks the right skill from its description: research before design, quality gates before shipping, evidence before claiming "done."
 
-## What's new in v2.1
+## What's new in v2.2
 
-- **3 new skills** from a multi-agent production build: `vibe-workstream-orchestration` (long-lived workstreams routed by an orchestrator that doesn't build), `vibe-publication-leak-guard` (scan built output so private and draft material stays out of production), and `vibe-flake-root-cause` (turn "flaky" into a reproduction).
-- **Extended skills**: panel mode for `vibe-devil-advocate-review`, deploy provenance for `vibe-safe-deploy`, wind-down mode for `vibe-handover-doc`, and performance budgets for `vibe-production-mindset`.
+- **New skill: `vibe-slop-filter`** counts the tells that make prose read as machine-written (keyword saturation, stacked tricolons, "not X, it's Y", bolded thesis lines, signpost phrases) and fixes the reflexive ones without sanding out real voice.
+- **`vibe-devil-advocate-review` now reviews any artifact as a named senior expert in its field**: code, specs, proposals, policies, curricula. It searches assuming defects exist, reports only those it can evidence, names genuine strengths in a line, and checks its own review for manufactured findings before sending.
+
+Earlier releases:
+- **v2.1** added `vibe-workstream-orchestration`, `vibe-publication-leak-guard`, and `vibe-flake-root-cause` from a multi-agent production build, plus panel mode, deploy provenance, wind-down handovers, and performance budgets in existing skills.
 - **v2.0** re-audited every skill against current Claude, GPT, and Gemini models and consolidated 38 skills into 29. If you're upgrading from v1.x, read the [migration notes](CHANGELOG.md#200---2026-09-25).
 
 Full history: [CHANGELOG](CHANGELOG.md) · [Releases](https://github.com/ash1794/vibe-engineering/releases)
 
 ## What is this?
 
-A skill collection in the open [Agent Skills](https://agentskills.io) format with 32 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
+A skill collection in the open [Agent Skills](https://agentskills.io) format with 33 skills that enforce engineering discipline across any project, plus a lightweight CLI (`vibe-cli`) for CI/CD pipelines and automation:
 
 - **Research & Decision-Making** (3 skills): think before building
-- **Quality Gates & Validation** (7 skills): catch issues before they ship
+- **Quality Gates & Validation** (8 skills): catch issues before they ship
 - **Knowledge & Continuity** (2 skills): never solve the same problem twice
 - **Parallel & Multi-Agent Development** (3 skills): scale your work safely
 - **Testing Patterns** (6 skills): test what matters, not just what's easy
@@ -69,7 +72,7 @@ git clone https://github.com/ash1794/vibe-engineering.git
 claude --plugin-dir ./vibe-engineering/plugins/vibe-engineering
 ```
 
-All 32 skills are now available in every Claude Code session.
+All 33 skills are now available in every Claude Code session.
 
 ### OpenAI Codex & Gemini CLI
 
@@ -237,7 +240,7 @@ The CLI exposes the critical parts for automation:
 |-------|---------|---------|
 | `vibe-research-before-design` | Before any new feature/architecture/tech choice | Research real projects, papers, and documented failures, with verified sources |
 | `vibe-decision-journal` | After any architectural choice or before committing | Automatic decision extraction from diffs + ADR recording |
-| `vibe-devil-advocate-review` | Before shipping recommendations, large changes, or multi-agent releases | 5-dimension challenge by a fresh context or different model; panel mode runs parallel lenses with a verification stage |
+| `vibe-devil-advocate-review` | Before shipping recommendations, large changes, or multi-agent releases; any "tear this apart" request | 5-dimension challenge from a named senior expert's standards, by a fresh context or different model; only evidenced findings survive; panel mode runs parallel lenses with a verification stage |
 
 ### Quality Gates & Validation
 | Skill | Trigger | Purpose |
@@ -249,6 +252,7 @@ The CLI exposes the critical parts for automation:
 | `vibe-doc-quality-gate` | After editing any technical doc | Fast 6-point document quality check |
 | `vibe-requirements-validator` | When reviewing PRD/user stories | SMART criteria validation |
 | `vibe-coverage-enforcer` | Before claiming code complete | 3-dimension coverage: line + spec-to-test + spec-to-code |
+| `vibe-slop-filter` | Before shipping prose a person will read (docs, release notes, PR descriptions, posts) | Counts AI-writing tells first, then keeps only the devices doing real work |
 
 ### Knowledge & Continuity
 | Skill | Trigger | Purpose |
@@ -309,6 +313,7 @@ AI coding agents are far more capable than they were a year ago, but some failur
 | Test loosened until it passed | Caught and disclosed (`vibe-anti-rationalization-check`) |
 | Same bug investigated twice | Root cause saved to the agent's memory file (`vibe-reflect-and-compound`) |
 | Self-review that agrees with itself | Review by a fresh context or another model (`vibe-devil-advocate-review`) |
+| Release notes that read like a chatbot wrote them | Tells counted and cut (`vibe-slop-filter`) |
 
 ## Design Principles
 
@@ -333,7 +338,7 @@ vibe-engineering/                          # repo root = marketplace root
 ├── plugins/
 │   └── vibe-engineering/                  # plugin root
 │       ├── .claude-plugin/plugin.json     # plugin: "vibe-engineering"
-│       └── skills/                        # 32 skill definitions
+│       └── skills/                        # 33 skill definitions
 │           ├── vibe-help/SKILL.md
 │           ├── vibe-quality-loop/SKILL.md
 │           ├── vibe-spec-sync/SKILL.md
@@ -407,7 +412,7 @@ These skills were extracted from building an 11-agent personal assistant system 
 **The numbers:**
 - 50+ session observations analyzed (310k+ tokens of development history)
 - 15 project-specific skills generalized into 38 universal patterns (v1.x)
-- Consolidated to 29 in v2.0 after re-auditing each one against current Claude, GPT, and Gemini models; v2.1 added 3 from a multi-agent production build
+- Consolidated to 29 in v2.0 after re-auditing each one against current Claude, GPT, and Gemini models; v2.1 added 3 from a multi-agent production build; v2.2 added 1 for prose quality
 - Every skill represents a pattern that emerged from real pain — not a theoretical best practice document
 
 ## Also Check Out

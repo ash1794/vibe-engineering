@@ -11,8 +11,8 @@
     {
       "name": "vibe-engineering",
       "source": "./plugins/vibe-engineering",
-      "description": "32 engineering discipline skills — research, quality gates, reward-hacking checks, testing patterns, deployment, gap analysis, spec sync, and more. Extracted from real-world development.",
-      "version": "2.1.0",
+      "description": "33 engineering discipline skills — research, quality gates, reward-hacking checks, testing patterns, deployment, gap analysis, spec sync, and more. Extracted from real-world development.",
+      "version": "2.2.0",
       "author": {
         "name": "Ashwin K",
         "email": "ash1794@gmail.com"
