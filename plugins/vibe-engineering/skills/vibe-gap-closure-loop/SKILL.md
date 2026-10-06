@@ -1,6 +1,6 @@
 ---
 name: vibe-gap-closure-loop
-description: Closes a large backlog of findings (a gap analysis, an audit, or 10+ bugs) in prioritized waves. Loops through triage, dependency analysis, parallel fix streams, a test gate, and re-audit until the target is met.
+description: Closes a large backlog of findings (a gap analysis, an audit, or 10+ bugs) in prioritized waves. Loops through triage, dependency analysis, parallel fix streams, a test gate, and re-audit until the target is met. Use after a gap analysis, audit, or review produces 10+ findings, or to burn down a large bug or tech-debt backlog.
 user-invocable: true
 ---
 

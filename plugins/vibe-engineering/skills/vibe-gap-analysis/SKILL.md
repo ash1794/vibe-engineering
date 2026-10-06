@@ -1,6 +1,6 @@
 ---
 name: vibe-gap-analysis
-description: Assesses production readiness or audits a codebase against its specs. Supports quick static mode, deep 17-dimension audit, or single-dimension focus.
+description: Assesses production readiness or audits a codebase against its specs. Supports quick static mode, deep 17-dimension audit, or single-dimension focus. Use before a production launch, after a major refactor, when inheriting a codebase, or when someone asks how done the project is.
 user-invocable: true
 ---
 

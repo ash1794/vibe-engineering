@@ -1,6 +1,6 @@
 ---
 name: vibe-rollback-plan
-description: Documents rollback procedures before making risky changes. Covers what's changing, verification steps, rollback procedures, and blast radius assessment.
+description: Documents rollback procedures before making risky changes. Covers what's changing, verification steps, rollback procedures, and blast radius assessment. Use before database migrations, breaking API changes, infrastructure or DNS changes, large dependency upgrades, or any change where undo is not obvious.
 user-invocable: true
 ---
 
