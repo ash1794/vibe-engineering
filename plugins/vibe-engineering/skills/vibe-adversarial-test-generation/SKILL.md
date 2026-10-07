@@ -1,6 +1,6 @@
 ---
 name: vibe-adversarial-test-generation
-description: Generates edge case, failure mode, and spec-driven test cases. Covers boundary values, nil inputs, concurrency, resource exhaustion, malformed data, and requirement-linked traceability tests.
+description: Generates edge case, failure mode, and spec-driven test cases. Covers boundary values, nil inputs, concurrency, resource exhaustion, malformed data, and requirement-linked traceability tests. Use after happy-path tests exist and before claiming coverage is complete, when requirements lack tests, or before a security review.
 user-invocable: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: vibe-spec-sync
-description: Keeps specification documents and code in agreement. Audit mode finds every divergence when an implementation is claimed complete; sync mode detects spec drift in staged changes and updates the spec after user approval, so each commit is a reconciled snapshot of spec, tests, and code.
+description: Keeps specification documents and code in agreement. Audit mode finds every divergence when an implementation is claimed complete; sync mode detects spec drift in staged changes and updates the spec after user approval, so each commit is a reconciled snapshot of spec, tests, and code. Use when an implementation is claimed complete against a spec, before committing changes that may drift from the spec, or after approving decisions that must flow back into it.
 user-invocable: true
 ---
 

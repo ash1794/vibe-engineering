@@ -1,6 +1,6 @@
 ---
 name: vibe-decision-journal
-description: Extracts and records architectural decisions from diffs, conversation context, and explicit choices. Supports automatic extraction from staged changes, deduplication against prior decisions, and persistent ADR-format logging with spec traceability.
+description: Extracts and records architectural decisions from diffs, conversation context, and explicit choices. Supports automatic extraction from staged changes, deduplication against prior decisions, and persistent ADR-format logging with spec traceability. Use after a significant design or architecture choice, before committing a diff that embeds implicit decisions, or when the same question keeps resurfacing.
 user-invocable: true
 ---
 
