@@ -1,7 +1,7 @@
 {
   "name": "vibe-engineering",
   "description": "33 engineering discipline skills for Claude Code, OpenAI Codex & Gemini CLI — research, quality gates, reward-hacking checks, testing patterns, deployment, gap analysis, spec sync, and more. Extracted from real-world development.",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "author": {
     "name": "Ashwin K",
     "email": "ash1794@gmail.com"

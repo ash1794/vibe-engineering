@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-08
+
+Community fixes plus a `vibe-cli` portability pass. `vibe-cli` was broken on stock macOS in three separate ways; all three are fixed and the secret scan is now under test in CI.
+
+### Fixed
+- **`vibe-cli` failed to start under macOS's `/bin/bash` 3.2** (`unexpected EOF while looking for matching '`). The pre-commit hook heredoc is now written directly instead of through command substitution, and stale `vibe` command names in messages now say `vibe-cli`. Thanks @rudyy07 (#5).
+- **`vibe-cli pre-commit` reported CLEAN on macOS with a secret staged.** Every scan used `grep -P`, which BSD grep doesn't support, and the errors were suppressed. `vibe-cli` now uses GNU grep (`ggrep`) when the system grep lacks `-P`, and refuses to run, rather than pass falsely, when neither is available.
+- **`--json` printed nothing.** The text-only log helpers returned non-zero in JSON mode, so `set -e` exited before any output. Also fixed: unescaped `\` and `"` in patterns and paths produced invalid JSON, empty result arrays crashed under bash 3.2's `set -u`, `decisions` and `spec-drift` exited early when a grep matched nothing, and text summaries were appended after the JSON.
+- `scripts/validate-skills.sh`: the skill-count consistency check used `grep -P` and was silently skipped on macOS; it now uses `perl`.
+
+### Changed
+- Nine skill descriptions gained a "Use when..." trigger clause taken from each skill's own *When to Use* section, so agents select them more reliably: `vibe-adversarial-test-generation`, `vibe-decision-journal`, `vibe-fuzz-parser-inputs`, `vibe-gap-analysis`, `vibe-gap-closure-loop`, `vibe-parallel-task-decomposition`, `vibe-rollback-plan`, `vibe-scenario-matrix`, `vibe-spec-sync`. Thanks @satanonsteroids2024-zzz (#7).
+- README: `vibe-cli` command names in the spec-code-test loop. Thanks @webbrain-one (#4).
+- CI: a smoke test stages a fake secret and asserts `vibe-cli pre-commit` blocks it.
+
 ## [2.2.0] - 2026-10-06
 
 Two external skills reviewed against the catalog. One overlapped an existing skill and was folded in; the other covered ground nothing here did. **32 → 33 skills.**
@@ -182,7 +197,8 @@ Every skill was re-audited against current Claude, GPT (Codex), and Gemini model
 - Marketplace distribution support via marketplace.json
 - MIT license
 
-[Unreleased]: https://github.com/ash1794/vibe-engineering/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/ash1794/vibe-engineering/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/ash1794/vibe-engineering/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/ash1794/vibe-engineering/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/ash1794/vibe-engineering/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/ash1794/vibe-engineering/compare/v1.5.1...v2.0.0

@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-VERSION="2.2.0"
+VERSION="2.3.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -23,10 +23,27 @@ fi
 OUTPUT="${VIBE_OUTPUT:-text}"
 
 die()  { echo -e "${RED}error:${RESET} $1" >&2; exit 1; }
-info() { [[ "$OUTPUT" == "text" ]] && echo -e "${BLUE}>>>${RESET} $1"; }
-pass() { [[ "$OUTPUT" == "text" ]] && echo -e "${GREEN}PASS${RESET} $1"; }
-fail() { [[ "$OUTPUT" == "text" ]] && echo -e "${RED}FAIL${RESET} $1"; }
-warn() { [[ "$OUTPUT" == "text" ]] && echo -e "${YELLOW}WARN${RESET} $1"; }
+# These must return 0 in JSON mode, or set -e exits before any JSON is printed.
+info() { [[ "$OUTPUT" == "text" ]] && echo -e "${BLUE}>>>${RESET} $1" || true; }
+pass() { [[ "$OUTPUT" == "text" ]] && echo -e "${GREEN}PASS${RESET} $1" || true; }
+fail() { [[ "$OUTPUT" == "text" ]] && echo -e "${RED}FAIL${RESET} $1" || true; }
+warn() { [[ "$OUTPUT" == "text" ]] && echo -e "${YELLOW}WARN${RESET} $1" || true; }
+say()  { [[ "$OUTPUT" == "text" ]] && echo -e "${1:-}" || true; }
+# Escape a value for a JSON string (patterns and paths contain \ and ")
+jesc() { local v="${1//\\/\\\\}"; printf '%s' "${v//\"/\\\"}"; }
+
+# The scans use PCRE (grep -P). BSD grep (macOS) has no -P, and with errors
+# suppressed every scan would match nothing and report CLEAN. Use GNU grep
+# when the system grep lacks -P, and refuse to run rather than pass falsely.
+require_pcre_grep() {
+  if echo x | command grep -qP 'x' 2>/dev/null; then
+    return 0
+  elif command -v ggrep >/dev/null 2>&1 && echo x | ggrep -qP 'x' 2>/dev/null; then
+    grep() { ggrep "$@"; }
+  else
+    die "vibe-cli needs GNU grep with -P support. On macOS: brew install grep"
+  fi
+}
 
 # ── help ──────────────────────────────────────────────────────────
 
@@ -109,7 +126,7 @@ cmd_pre_commit() {
     local matches
     matches=$(echo "$diff" | grep -cPi "$pattern" 2>/dev/null || true)
     if [[ "$matches" -gt 0 ]]; then
-      findings+=("{\"type\":\"secret\",\"severity\":\"blocker\",\"pattern\":\"$pattern\",\"count\":$matches}")
+      findings+=("{\"type\":\"secret\",\"severity\":\"blocker\",\"pattern\":\"$(jesc "$pattern")\",\"count\":$matches}")
       blockers=$((blockers + matches))
       fail "Possible secret: $pattern ($matches occurrences)"
     fi
@@ -138,7 +155,7 @@ cmd_pre_commit() {
     local added_matches
     added_matches=$(echo "$diff" | grep "^+" | grep -cP "$pattern" 2>/dev/null || true)
     if [[ "$added_matches" -gt 0 ]]; then
-      findings+=("{\"type\":\"debug\",\"severity\":\"warning\",\"pattern\":\"$pattern\",\"count\":$added_matches}")
+      findings+=("{\"type\":\"debug\",\"severity\":\"warning\",\"pattern\":\"$(jesc "$pattern")\",\"count\":$added_matches}")
       warnings=$((warnings + added_matches))
       warn "Debug statement: $pattern ($added_matches added)"
     fi
@@ -166,7 +183,7 @@ cmd_pre_commit() {
     local matches
     matches=$(echo "$diff" | grep "^+" | grep -cP "$pattern" 2>/dev/null || true)
     if [[ "$matches" -gt 0 ]]; then
-      findings+=("{\"type\":\"disabled_test\",\"severity\":\"warning\",\"pattern\":\"$pattern\",\"count\":$matches}")
+      findings+=("{\"type\":\"disabled_test\",\"severity\":\"warning\",\"pattern\":\"$(jesc "$pattern")\",\"count\":$matches}")
       warnings=$((warnings + matches))
       warn "Disabled test: $pattern ($matches)"
     fi
@@ -179,7 +196,7 @@ cmd_pre_commit() {
       size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
       if [[ "$size" -gt 1048576 ]]; then
         local size_mb=$((size / 1048576))
-        findings+=("{\"type\":\"large_file\",\"severity\":\"warning\",\"pattern\":\"$file (${size_mb}MB)\",\"count\":1}")
+        findings+=("{\"type\":\"large_file\",\"severity\":\"warning\",\"pattern\":\"$(jesc "$file") (${size_mb}MB)\",\"count\":1}")
         warnings=$((warnings + 1))
         warn "Large file: $file (${size_mb}MB)"
       fi
@@ -192,7 +209,7 @@ cmd_pre_commit() {
     [[ $blockers -gt 0 ]] && status="fail"
     [[ $warnings -gt 0 && $blockers -eq 0 ]] && status="warn"
     local findings_json
-    findings_json=$(printf '%s\n' "${findings[@]}" | paste -sd',' - 2>/dev/null || echo "")
+    findings_json=$(printf '%s\n' ${findings[@]+"${findings[@]}"} | paste -sd',' - 2>/dev/null || echo "")
     echo "{\"status\":\"$status\",\"blockers\":$blockers,\"warnings\":$warnings,\"findings\":[${findings_json}]}"
   fi
 
@@ -342,13 +359,13 @@ cmd_spec_drift() {
 
   if [[ -z "$staged" ]]; then
     pass "No staged changes"
-    [[ "$OUTPUT" == "json" ]] && echo '{"status":"pass","drift_items":0,"spec":"'"$spec_path"'"}'
+    [[ "$OUTPUT" == "json" ]] && echo '{"status":"pass","drift_items":0,"spec":"'"$(jesc "$spec_path")"'"}'
     exit 0
   fi
 
   # Extract spec sections (## headers)
   local spec_sections
-  spec_sections=$(grep -nP '^#{1,3}\s+' "$spec_path" | head -50)
+  spec_sections=$(grep -nP '^#{1,3}\s+' "$spec_path" | head -50 || true)
 
   # Get the staged diff
   local diff
@@ -357,7 +374,7 @@ cmd_spec_drift() {
   # Check which spec sections might be affected by the diff
   # Simple heuristic: extract keywords from changed function/class names and match against spec headers
   local changed_symbols
-  changed_symbols=$(echo "$diff" | grep -oP '^\+.*(def |func |function |class |type |struct |interface )\K\w+' | sort -u)
+  changed_symbols=$(echo "$diff" | grep -oP '^\+.*(def |func |function |class |type |struct |interface )\K\w+' | sort -u || true)
 
   local drift_count=0
   local drift_items=()
@@ -373,7 +390,7 @@ cmd_spec_drift() {
       local line_num section_name
       line_num=$(echo "$matching_section" | cut -d: -f1)
       section_name=$(echo "$matching_section" | cut -d: -f2-)
-      drift_items+=("{\"symbol\":\"$symbol\",\"spec_section\":\"$(echo "$section_name" | sed 's/"/\\"/g')\",\"spec_line\":$line_num}")
+      drift_items+=("{\"symbol\":\"$(jesc "$symbol")\",\"spec_section\":\"$(jesc "$section_name")\",\"spec_line\":$line_num}")
       warn "Changed '$symbol' — may affect spec section: $section_name"
     fi
   done <<< "$changed_symbols"
@@ -383,12 +400,12 @@ cmd_spec_drift() {
   new_files=$(git diff --cached --diff-filter=A --name-only 2>/dev/null || true)
   if [[ -n "$new_files" ]]; then
     local new_count
-    new_count=$(echo "$new_files" | wc -l)
+    new_count=$(echo "$new_files" | wc -l | tr -d " ")
     if [[ $new_count -gt 0 ]]; then
       drift_count=$((drift_count + new_count))
       warn "$new_count new file(s) added — may need spec sections"
       while IFS= read -r nf; do
-        drift_items+=("{\"symbol\":\"new_file\",\"spec_section\":\"(needs new section)\",\"file\":\"$nf\"}")
+        drift_items+=("{\"symbol\":\"new_file\",\"spec_section\":\"(needs new section)\",\"file\":\"$(jesc "$nf")\"}")
       done <<< "$new_files"
     fi
   fi
@@ -397,14 +414,14 @@ cmd_spec_drift() {
     local status="pass"
     [[ $drift_count -gt 0 ]] && status="drift_detected"
     local items_json
-    items_json=$(printf '%s\n' "${drift_items[@]}" 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
-    echo "{\"status\":\"$status\",\"drift_items\":$drift_count,\"spec\":\"$spec_path\",\"items\":[${items_json}]}"
+    items_json=$(printf '%s\n' ${drift_items[@]+"${drift_items[@]}"} 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
+    echo "{\"status\":\"$status\",\"drift_items\":$drift_count,\"spec\":\"$(jesc "$spec_path")\",\"items\":[${items_json}]}"
   fi
 
-  echo ""
+  say
   if [[ $drift_count -gt 0 ]]; then
-    echo -e "${YELLOW}${BOLD}DRIFT DETECTED${RESET}: $drift_count potential spec drift item(s)"
-    echo -e "Run ${BOLD}vibe-spec-sync${RESET} skill to review and update the spec."
+    say "${YELLOW}${BOLD}DRIFT DETECTED${RESET}: $drift_count potential spec drift item(s)"
+    say "Run ${BOLD}vibe-spec-sync${RESET} skill to review and update the spec."
     exit 2
   else
     pass "No spec drift detected"
@@ -429,7 +446,7 @@ cmd_decisions() {
   local diff
   diff=$(git diff --cached --stat)
   local files_changed
-  files_changed=$(echo "$staged" | wc -l)
+  files_changed=$(echo "$staged" | wc -l | tr -d " ")
 
   # Extract potential decisions by looking for structural changes
   local decisions=()
@@ -437,10 +454,10 @@ cmd_decisions() {
 
   # New abstractions (class/struct/interface/type definitions)
   local new_types
-  new_types=$(git diff --cached | grep -oP '^\+.*(class |struct |interface |type )\K\w+' | sort -u)
+  new_types=$(git diff --cached | grep -oP '^\+.*(class |struct |interface |type )\K\w+' | sort -u || true)
   while IFS= read -r t; do
     [[ -z "$t" ]] && continue
-    decisions+=("{\"type\":\"new_abstraction\",\"description\":\"Introduced $t\",\"source\":\"diff\"}")
+    decisions+=("{\"type\":\"new_abstraction\",\"description\":\"Introduced $(jesc "$t")\",\"source\":\"diff\"}")
     decision_count=$((decision_count + 1))
     info "New abstraction: $t"
   done <<< "$new_types"
@@ -448,15 +465,15 @@ cmd_decisions() {
   # New dependencies
   local new_deps=""
   if [[ -f "pyproject.toml" ]]; then
-    new_deps=$(git diff --cached -- pyproject.toml | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '"\K[a-zA-Z0-9_-]+(?=[><=~])' || true)
+    new_deps=$(git diff --cached -- pyproject.toml | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"\K[a-zA-Z0-9_-]+(?=[><=~])' || true)
   elif [[ -f "package.json" ]]; then
-    new_deps=$(git diff --cached -- package.json | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '"(\K[^"]+)(?="\s*:)' || true)
+    new_deps=$(git diff --cached -- package.json | grep '^+' | grep -vP '^\+\+\+' | grep -oP '"(\K[^"]+)(?="\s*:)' || true)
   elif [[ -f "go.mod" ]]; then
-    new_deps=$(git diff --cached -- go.mod | grep '^\+' | grep -vP '^\+\+\+' | grep -oP '\S+/\S+' || true)
+    new_deps=$(git diff --cached -- go.mod | grep '^+' | grep -vP '^\+\+\+' | grep -oP '\S+/\S+' || true)
   fi
   while IFS= read -r dep; do
     [[ -z "$dep" ]] && continue
-    decisions+=("{\"type\":\"new_dependency\",\"description\":\"Added dependency: $dep\",\"source\":\"diff\"}")
+    decisions+=("{\"type\":\"new_dependency\",\"description\":\"Added dependency: $(jesc "$dep")\",\"source\":\"diff\"}")
     decision_count=$((decision_count + 1))
     info "New dependency: $dep"
   done <<< "$new_deps"
@@ -466,7 +483,7 @@ cmd_decisions() {
   api_changes=$(git diff --cached | grep -oP '^\+.*(app\.(get|post|put|delete|patch)|@(app|router)\.(get|post|put|delete|patch)|HandleFunc|http\.Handle)\s*\(\s*["\x27/]\K[^"\x27]+' | sort -u || true)
   while IFS= read -r route; do
     [[ -z "$route" ]] && continue
-    decisions+=("{\"type\":\"api_change\",\"description\":\"New/changed endpoint: $route\",\"source\":\"diff\"}")
+    decisions+=("{\"type\":\"api_change\",\"description\":\"New/changed endpoint: $(jesc "$route")\",\"source\":\"diff\"}")
     decision_count=$((decision_count + 1))
     info "API change: $route"
   done <<< "$api_changes"
@@ -476,7 +493,7 @@ cmd_decisions() {
   config_changes=$(echo "$staged" | grep -iP '(config|\.env|settings|\.ya?ml)' || true)
   while IFS= read -r cfg; do
     [[ -z "$cfg" ]] && continue
-    decisions+=("{\"type\":\"config_change\",\"description\":\"Configuration changed: $cfg\",\"source\":\"diff\"}")
+    decisions+=("{\"type\":\"config_change\",\"description\":\"Configuration changed: $(jesc "$cfg")\",\"source\":\"diff\"}")
     decision_count=$((decision_count + 1))
     info "Config change: $cfg"
   done <<< "$config_changes"
@@ -486,14 +503,14 @@ cmd_decisions() {
     local status="pass"
     [[ $decision_count -gt 0 ]] && status="decisions_found"
     local items_json
-    items_json=$(printf '%s\n' "${decisions[@]}" 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
+    items_json=$(printf '%s\n' ${decisions[@]+"${decisions[@]}"} 2>/dev/null | paste -sd',' - 2>/dev/null || echo "")
     echo "{\"status\":\"$status\",\"count\":$decision_count,\"files_changed\":$files_changed,\"decisions\":[${items_json}]}"
   fi
 
-  echo ""
+  say
   if [[ $decision_count -gt 0 ]]; then
-    echo -e "${YELLOW}${BOLD}$decision_count decision(s) detected${RESET} from $files_changed changed file(s)"
-    echo -e "Run ${BOLD}vibe-decision-journal${RESET} skill for full extraction and recording."
+    say "${YELLOW}${BOLD}$decision_count decision(s) detected${RESET} from $files_changed changed file(s)"
+    say "Run ${BOLD}vibe-decision-journal${RESET} skill for full extraction and recording."
     exit 2
   else
     pass "No notable decisions detected in staged changes"
@@ -571,10 +588,10 @@ COMMAND="${1:-help}"
 shift || true
 
 case "$COMMAND" in
-  pre-commit)   cmd_pre_commit "$@" ;;
-  coverage)     cmd_coverage "$@" ;;
-  spec-drift)   cmd_spec_drift "$@" ;;
-  decisions)    cmd_decisions "$@" ;;
+  pre-commit)   require_pcre_grep; cmd_pre_commit "$@" ;;
+  coverage)     require_pcre_grep; cmd_coverage "$@" ;;
+  spec-drift)   require_pcre_grep; cmd_spec_drift "$@" ;;
+  decisions)    require_pcre_grep; cmd_decisions "$@" ;;
   validate)     cmd_validate "$@" ;;
   hook)         cmd_hook "$@" ;;
   help)         cmd_help ;;

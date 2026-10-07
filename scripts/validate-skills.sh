@@ -132,7 +132,8 @@ for f in "$README" "$AGENTS_MD" "$PLUGIN_JSON" "$MARKETPLACE_JSON" "$REPO_ROOT/C
       error "$(basename "$f") claims $n skills but found $skill_count skill directories"
       count_ok=0
     fi
-  done < <(grep -oP '\b\d+(?= engineering[- ]discipline skills\b)|(?<=Skills-)\d+(?=-)|(?<=All )\d+(?= skills?\b)|\b\d+(?= skill definitions)' "$f" || true)
+  # perl, not grep -P: BSD grep (macOS) has no -P and would silently skip this check
+  done < <(perl -nle 'print $& while /\b\d+(?= engineering[- ]discipline skills\b)|(?<=Skills-)\d+(?=-)|(?<=All )\d+(?= skills?\b)|\b\d+(?= skill definitions)/g' "$f")
 done
 [[ $count_ok -eq 1 ]] && echo "  Skill count matches everywhere: $skill_count"
 

@@ -20,12 +20,13 @@
 
 Your agent picks the right skill from its description: research before design, quality gates before shipping, evidence before claiming "done."
 
-## What's new in v2.2
+## What's new in v2.3
 
-- **New skill: `vibe-slop-filter`** counts the tells that make prose read as machine-written (keyword saturation, stacked tricolons, "not X, it's Y", bolded thesis lines, signpost phrases) and fixes the reflexive ones without sanding out real voice.
-- **`vibe-devil-advocate-review` now reviews any artifact as a named senior expert in its field**: code, specs, proposals, policies, curricula. It searches assuming defects exist, reports only those it can evidence, names genuine strengths in a line, and checks its own review for manufactured findings before sending.
+- **`vibe-cli` works on macOS.** It runs under the stock bash 3.2, and its scans no longer pass silently with BSD grep, which used to report CLEAN with a secret staged. `--json` output is now valid on every command. CI checks that a staged secret is blocked.
+- **Sharper skill triggers**: nine skills now say when to use them in their descriptions, so agents pick them more reliably.
 
 Earlier releases:
+- **v2.2** added `vibe-slop-filter` for prose that reads as machine-written, and `vibe-devil-advocate-review` now reviews any artifact from a named senior expert's standards, reporting only evidenced findings.
 - **v2.1** added `vibe-workstream-orchestration`, `vibe-publication-leak-guard`, and `vibe-flake-root-cause` from a multi-agent production build, plus panel mode, deploy provenance, wind-down handovers, and performance budgets in existing skills.
 - **v2.0** re-audited every skill against current Claude, GPT, and Gemini models and consolidated 38 skills into 29. If you're upgrading from v1.x, read the [migration notes](CHANGELOG.md#200---2026-09-25).
 
@@ -120,7 +121,7 @@ In Gemini CLI, skills are activated automatically from their descriptions, or yo
 
 ## CLI: `vibe-cli`
 
-The `vibe-cli` CLI wraps critical skills into CI/CD-friendly commands with proper exit codes and JSON output. No dependencies — pure bash.
+The `vibe-cli` CLI wraps critical skills into CI/CD-friendly commands with proper exit codes and JSON output. Pure bash (3.2+, so stock macOS works) plus GNU grep for its PCRE scans. Linux has it already; on macOS, `brew install grep`. Without it the CLI stops with an error instead of reporting a false CLEAN.
 
 ### Setup
 

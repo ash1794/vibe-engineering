@@ -14,3 +14,15 @@ jobs:
 
       - name: Validate skill files and manifests
         run: ./scripts/validate-skills.sh
+
+      - name: vibe-cli pre-commit blocks a staged secret
+        run: |
+          cli="$GITHUB_WORKSPACE/scripts/vibe-cli"
+          tmp="$(mktemp -d)" && cd "$tmp"
+          git init -q
+          printf 'key = "AKIAABCDEFGHIJKLMNOP"\nconsole.log("debug")\n' > a.js
+          git add a.js
+          set +e; "$cli" pre-commit; code=$?; set -e
+          if [ "$code" -ne 1 ]; then
+            echo "expected exit 1 (blocked), got $code"; exit 1
+          fi
