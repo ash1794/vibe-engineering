@@ -517,8 +517,7 @@ cmd_hook() {
 
   case "$action" in
     install)
-      local hook_content
-      hook_content="$(cat <<'HOOK'
+      cat <<'HOOK' > "$hook_path"
 #!/usr/bin/env bash
 # vibe-engineering pre-commit hook
 # Runs pre-commit audit. Exit 1 = blocked, Exit 2 = warnings (allowed).
@@ -534,12 +533,10 @@ if [[ -x "$VIBE_SCRIPT" ]]; then
     echo "Commit blocked by vibe pre-commit. Fix blocking issues above."
     exit 1
   fi
-  # Warnings (exit 2) don't block
+  # Warnings (exit 2) do not block
 fi
 exit 0
 HOOK
-)"
-      echo "$hook_content" > "$hook_path"
       chmod +x "$hook_path"
       pass "Pre-commit hook installed at $hook_path"
       ;;
@@ -552,7 +549,7 @@ HOOK
       fi
       ;;
     *)
-      die "Usage: vibe hook install|uninstall"
+      die "Usage: vibe-cli hook install|uninstall"
       ;;
   esac
 }
@@ -582,5 +579,5 @@ case "$COMMAND" in
   hook)         cmd_hook "$@" ;;
   help)         cmd_help ;;
   version)      echo "vibe-cli v${VERSION}" ;;
-  *)            die "Unknown command: $COMMAND. Run 'vibe help' for usage." ;;
+  *)            die "Unknown command: $COMMAND. Run 'vibe-cli help' for usage." ;;
 esac
