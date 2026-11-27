@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-11-28
+
+Patch release: skills are now layered (checks, gates, orchestrators) and CI enforces it. No skill's behaviour or name changed.
+
+### Added
+- `tools/archcheck/` (shared standard) and `.archcheck.json` with the layer map; CI runs the check and its tests as blocking steps.
+
+### Changed
+- Broke all 5 skill reference loops (15 skills) and 10 upward references by editing bodies of `vibe-adversarial-test-generation`, `vibe-anti-rationalization-check`, `vibe-cherry-pick-integration`, `vibe-coverage-enforcer`, `vibe-devil-advocate-review`, `vibe-doc-quality-gate`, `vibe-parallel-task-decomposition`, `vibe-publication-leak-guard`, `vibe-slop-filter` and `vibe-spec-sync`: lower skills state an output contract instead of naming the skill that calls them.
+
 ## [2.3.0] - 2026-10-08
 
 Community fixes plus a `vibe-cli` portability pass. `vibe-cli` was broken on stock macOS in three separate ways; all three are fixed and the secret scan is now under test in CI.

@@ -46,6 +46,16 @@ A skill collection in the open [Agent Skills](https://agentskills.io) format wit
 - **Process** (3 skills): stay focused, build to the right standard
 - **Meta** (1 skill): skill routing
 
+### Skill layers
+
+Skills are layered so a higher skill may name and invoke lower ones, never the reverse. Lowest first:
+
+- **checks**: one concern run on an artifact (slop filter, coverage enforcer, leak guard, fuzz, golden files, decision journal...)
+- **gates**: compose checks into a pass or fail for one stage (doc quality gate, acceptance gate, pre-commit audit, spec sync, devil's-advocate review), plus the parallel-work procedures (task decomposition, cherry-pick integration)
+- **orchestrators**: repeat or route across stages (quality loop, gap closure loop, workstream orchestration, help)
+
+A lower skill states its own output contract (what it returns, what the caller does next) and leaves sequencing to the orchestrator. Only the SKILL.md body counts; frontmatter descriptions may still route between skills. The map lives in `.archcheck.json` and CI enforces it with `python3 tools/archcheck/archcheck.py`.
+
 ### What the skills *don't* do
 
 Modern models and harnesses already handle some things well, and a skill that duplicates them only adds noise. v2.0 removed skills for context-window management (harnesses compact automatically), output formatting (models format well by default), always-on skill bootstrapping (skills trigger from their descriptions), and private task queues (use your issue tracker). See [CHANGELOG](CHANGELOG.md#200---2026-09-25) for the full list and migration.

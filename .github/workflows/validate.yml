@@ -15,6 +15,11 @@ jobs:
       - name: Validate skill files and manifests
         run: ./scripts/validate-skills.sh
 
+      - name: Skill layering (archcheck)
+        run: |
+          python3 tools/archcheck/archcheck.py
+          python3 -m unittest tools/archcheck/test_archcheck.py
+
       - name: vibe-cli pre-commit blocks a staged secret
         run: |
           cli="$GITHUB_WORKSPACE/scripts/vibe-cli"

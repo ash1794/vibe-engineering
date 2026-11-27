@@ -14,7 +14,7 @@ Coverage numbers don't guarantee quality, but low coverage guarantees surprise.
 - After writing tests, to verify coverage meets standards
 - During periodic coverage health checks
 - When deciding "do I need more tests?"
-- After `vibe-spec-sync` updates the spec — verify tests still cover requirements
+- After the spec is updated: verify tests still cover requirements
 
 ## When NOT to Use This Skill
 
@@ -68,7 +68,7 @@ Which spec requirements have corresponding implementations?
 3. **Compare actual vs. target** for each package (Dimension 1)
 
 4. **If a spec document exists**, run Dimensions 2 and 3:
-   - Find the spec (same logic as `vibe-spec-sync` Step 1)
+   - Find the spec (`spec.md`, `SPEC.md` or `*_spec.md` in the root or `docs/`, or a design doc under `docs/design/` or `docs/architecture/`; ask if ambiguous)
    - Extract requirements with IDs
    - Scan tests for traceability markers
    - Map requirements to implementations
@@ -123,7 +123,7 @@ Which spec requirements have corresponding implementations?
 ### Action Required
 1. `handlers/` needs +5% line coverage — suggest testing: [specific untested functions]
 2. AUTH-002 not implemented and not tested — implement first, then test
-3. 4 requirements lack tests — run `vibe-adversarial-test-generation` in spec-driven mode
+3. 4 requirements lack tests: the caller writes tests for them (spec-driven test generation fits)
 
 ### Suggested Tests
 ```

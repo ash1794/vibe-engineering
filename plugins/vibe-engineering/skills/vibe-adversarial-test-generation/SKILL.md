@@ -14,7 +14,7 @@ Happy-path tests prove your code works. Adversarial tests prove it doesn't break
 - Before claiming test coverage is complete
 - When spec requirements lack corresponding tests
 - When preparing for a security review
-- When `vibe-spec-sync` or `vibe-coverage-enforcer` reports uncovered requirements
+- When a spec audit or `vibe-coverage-enforcer` reports uncovered requirements
 
 ## When NOT to Use This Skill
 

@@ -25,7 +25,7 @@ Two rules govern the whole review. **Search like a pessimist**: assume defects e
 - Trivial changes (typo fixes, formatting)
 - When the user explicitly says "just ship it"
 - During brainstorming (don't kill ideas before they form)
-- Small code changes (use `vibe-quality-loop`)
+- Small code changes (a self-review loop covers these)
 - The user wants friendly proofreading or reassurance, not critique
 - Prose that reads as machine-written but is otherwise sound (use `vibe-slop-filter`)
 
@@ -97,7 +97,7 @@ One reviewer carries one set of blind spots, and unverified findings waste fix c
 2. **Run lenses in parallel**, each with a narrow brief and a bounded report format (`file:line`, severity). Pick lenses that fit the product, for example: editorial and tone, facts and privacy, UX and accessibility, engineering and performance.
 3. **Verify separately.** A distinct stage reproduces each finding on the current head and drops stale or false ones (already fixed, or a rule firing on text that already complies).
 4. **Dedupe and rank** P0–P2 across lenses.
-5. **Route** each confirmed finding to the owner of the file (`vibe-workstream-orchestration`), then re-run only the affected lenses.
+5. **Route** each confirmed finding to the owner of the file (the orchestrator, if one is running, owns the routing), then re-run only the affected lenses.
 
 If the harness supports scripted workflows, run the panel as one: it verifies more rigorously than routing findings by hand.
 

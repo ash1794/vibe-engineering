@@ -17,7 +17,7 @@ A source-diff scan catches a secret in a commit. It doesn't catch a private fiel
 
 ## When NOT to Use This Skill
 
-- Secret scanning of staged code (use `vibe-pre-commit-audit`)
+- Secret scanning of staged code (a pre-commit audit covers that)
 - A site with no private inputs and no draft content
 - Access control for authenticated content (that's an authorization problem, not a build scan)
 

@@ -21,7 +21,7 @@ Large tasks are often collections of independent subtasks hiding behind a sequen
 - All subtasks depend on each other sequentially
 - Changes are all in the same file
 - The overhead of coordination exceeds the benefit
-- Long-running, multi-phase work with follow-ups (use `vibe-workstream-orchestration`)
+- Long-running, multi-phase work with follow-ups (a workstream orchestrator covers that)
 
 ## Steps
 

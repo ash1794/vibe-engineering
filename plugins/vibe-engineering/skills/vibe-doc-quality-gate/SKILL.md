@@ -17,7 +17,7 @@ A fast quality gate for technical documents. Not a deep review — just catches 
 
 ## When NOT to Use This Skill
 
-- For code review (use `vibe-quality-loop` or `vibe-devil-advocate-review`)
+- For code review (use a self-review loop or `vibe-devil-advocate-review`)
 - For informal notes or scratch documents
 - For README files that are just getting started
 
