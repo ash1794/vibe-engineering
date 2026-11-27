@@ -186,7 +186,8 @@ def java_graph(root, cfg):
 
 def kotlin_graph(root, cfg):
     """Kotlin: one unit per package (build modules already forbid loops between modules; this catches loops
-    between packages inside one module). An edge is an import that resolves to another package of this tree."""
+    between packages inside one module). An edge is an import that resolves to another package of this tree.
+    Imports of the generated Android classes R and BuildConfig are resources, not code, and are skipped."""
     pkgs, imports = set(), defaultdict(list)
     for path, _ in _walk(root, (".kt", ".kts"), cfg.get("exclude", []) + ["test", "androidTest", "testFixtures"]):
         text = open(path, encoding="utf-8", errors="ignore").read()
@@ -194,7 +195,8 @@ def kotlin_graph(root, cfg):
         if not mt:
             continue
         pkgs.add(mt.group(1))
-        imports[mt.group(1)] += re.findall(r"^import\s+([\w.]+)", text, re.M)
+        imports[mt.group(1)] += [i for i in re.findall(r"^import\s+([\w.]+)", text, re.M)
+                                 if not re.search(r"\.(R|BuildConfig)(\.|$)", i)]  # generated Android classes
     edges = defaultdict(set)
     for p, imps in imports.items():
         for imp in imps:

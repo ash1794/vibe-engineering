@@ -77,11 +77,13 @@ class KotlinGraph(unittest.TestCase):
             tree(d, {
                 "m/src/main/kotlin/a/A.kt": "package x.a\nimport x.b.B\nimport kotlin.math.max\nclass A\n",
                 "m/src/main/kotlin/b/B.kt": "package x.b\nimport x.b.inner.C\nclass B\n",
-                "m/src/main/kotlin/b/inner/C.kt": "package x.b.inner\nclass C\n",
+                "m/src/main/kotlin/b/inner/C.kt": "package x.b.inner\nimport x.R\nimport x.BuildConfig\nclass C\n",
+                "m/src/main/kotlin/Root.kt": "package x\nimport x.b.inner.C\nclass Root\n",
                 "m/src/test/kotlin/T.kt": "package x.t\nimport x.a.A\n",
             })
             nodes, edges = archcheck.kotlin_graph(d, {})
-            self.assertEqual(nodes, {"x.a", "x.b", "x.b.inner"})
+            self.assertEqual(nodes, {"x", "x.a", "x.b", "x.b.inner"})
+            self.assertNotIn("x.b.inner", edges)  # R and BuildConfig are generated resources, not package x
             self.assertEqual(edges["x.a"], {"x.b"})
             self.assertEqual(edges["x.b"], {"x.b.inner"})
 
