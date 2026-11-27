@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "graphs": [
+    {
+      "name": "skills",
+      "lang": "skills",
+      "root": "plugins/vibe-engineering/skills",
+      "strict_layers": true,
+      "layers": [
+        {
+          "name": "checks",
+          "modules": [
+            "vibe-adversarial-test-generation",
+            "vibe-anti-rationalization-check",
+            "vibe-concurrent-test-safety",
+            "vibe-coverage-enforcer",
+            "vibe-decision-journal",
+            "vibe-flake-root-cause",
+            "vibe-fuzz-parser-inputs",
+            "vibe-gap-analysis",
+            "vibe-golden-file-testing",
+            "vibe-handover-doc",
+            "vibe-iteration-review",
+            "vibe-production-mindset",
+            "vibe-publication-leak-guard",
+            "vibe-reflect-and-compound",
+            "vibe-requirements-validator",
+            "vibe-research-before-design",
+            "vibe-rollback-plan",
+            "vibe-safe-deploy",
+            "vibe-scenario-matrix",
+            "vibe-scope-guard",
+            "vibe-service-health-dashboard",
+            "vibe-slop-filter"
+          ]
+        },
+        {
+          "name": "gates",
+          "modules": [
+            "vibe-acceptance-gate",
+            "vibe-cherry-pick-integration",
+            "vibe-devil-advocate-review",
+            "vibe-doc-quality-gate",
+            "vibe-parallel-task-decomposition",
+            "vibe-pre-commit-audit",
+            "vibe-spec-sync"
+          ]
+        },
+        {
+          "name": "orchestrators",
+          "modules": [
+            "vibe-gap-closure-loop",
+            "vibe-help",
+            "vibe-quality-loop",
+            "vibe-workstream-orchestration"
+          ]
+        }
+      ],
+      "baseline": {
+        "loops": [],
+        "up_edges": []
+      }
+    }
+  ]
+}

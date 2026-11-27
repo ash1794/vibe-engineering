@@ -12,7 +12,7 @@ Parallel agents produce parallel branches. This skill integrates them safely wit
 
 - Multiple agents completed work in isolated branches/worktrees
 - Need to combine parallel work onto a single integration branch
-- After `vibe-parallel-task-decomposition` dispatched work
+- After parallel streams were dispatched on isolated branches
 
 ## When NOT to Use This Skill
 

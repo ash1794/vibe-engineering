@@ -59,7 +59,7 @@ Read-only. Nothing is edited.
    - **Type**: Missing (spec says X, code has nothing) / Incorrect (spec says X, code does Y) / Extra (code does X, spec is silent)
    - **Severity**: Critical / High / Medium / Low
    - **Evidence**: the spec quote and the code `file:line`
-3. Report using the Audit Report format below. For 10+ gaps, hand them to `vibe-gap-closure-loop`. To accept an **Extra** or **Incorrect** item as the new intended behavior, run sync mode on it.
+3. Report using the Audit Report format below. Its output contract: a prioritized gap list the caller can close in waves (10+ gaps warrant a wave plan). To accept an **Extra** or **Incorrect** item as the new intended behavior, run sync mode on it.
 
 **Sync mode (default)** continues with Steps 2–5 below.
 
@@ -166,7 +166,6 @@ After applying updates:
 ## Integration with Other Skills
 
 - **`vibe-decision-journal`**: Decisions feed into spec sync. When decisions are approved, this skill updates the spec to reflect them.
-- **`vibe-gap-closure-loop`**: Closes large sets of audit-mode gaps in prioritized waves.
 - **`vibe-adversarial-test-generation`** (spec-driven mode): Generate tests for requirements that were updated or added during sync.
 - **`vibe-coverage-enforcer`**: Verify that test coverage still meets tier targets after spec-driven test additions.
 - **`vibe-pre-commit-audit`**: Complementary — that skill checks for secrets/debug code; this skill checks for spec alignment. Both belong in a pre-commit workflow.

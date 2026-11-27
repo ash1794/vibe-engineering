@@ -67,3 +67,5 @@ bash scripts/validate-skills.sh
 - **Keep skills harness-neutral**: describe capabilities, not Claude-only tool names, and never hard-code a model. See `references/platform-tools.md`. Don't add a skill for something current models already do well unprompted.
 - **Version bumps** must update `plugins/vibe-engineering/.claude-plugin/plugin.json`, `scripts/vibe-cli` (`VERSION=`), and the plugin entry in `.claude-plugin/marketplace.json` together. The validator enforces all three.
 - **Never** move files back to the repo root. Never rename the marketplace to `vibe-engineering`. Both will fail CI.
+- **Skill layers** (checks -> gates -> orchestrators, lowest first, map in `.archcheck.json`): a SKILL.md body may name only skills in its own or a lower layer, and skills must not reference each other in a loop. A lower skill states its output contract instead of naming the orchestrator that calls it. Assign every new skill a layer.
+- Run `python3 tools/archcheck/archcheck.py` and `python3 -m unittest tools/archcheck/test_archcheck.py` before pushing. Never edit `tools/archcheck/` (shared standard).
