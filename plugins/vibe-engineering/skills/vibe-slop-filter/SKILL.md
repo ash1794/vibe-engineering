@@ -27,8 +27,8 @@ For every flag the test is the same: **is this doing work, or is it reflex?** Ke
 
 - Code, config, and structured data
 - Reference material that is meant to be scanned (API tables, command lists, changelogs written as bullet lists)
-- Checking a technical document's structure and accuracy (a documentation gate covers that)
-- Critiquing whether the argument is right (a hostile review covers that); this skill fixes how prose reads, not what it claims
+- Checking a technical document's structure and accuracy (use `vibe-doc-quality-gate`)
+- Critiquing whether the argument is right (use `vibe-devil-advocate-review`); this skill fixes how prose reads, not what it claims
 - Text the user wrote in their own voice and didn't ask you to change
 
 ## Steps

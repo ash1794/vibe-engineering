@@ -209,13 +209,15 @@ def kotlin_graph(root, cfg):
 def skills_graph(root, cfg):
     """Agent skill library: one unit per skill folder; an edge when a SKILL.md body names another skill.
 
-    The YAML frontmatter is skipped: descriptions decide which skill an agent picks (routing), while the body says
-    what the skill runs. Only the body creates a dependency."""
+    Routing text is skipped: the YAML frontmatter and any section headed "When NOT to use", "See also" or
+    "Related ..." tell an agent which skill to pick instead, they do not make this skill depend on that one.
+    Everything else in the body says what the skill runs, so a mention there is a dependency."""
     names = sorted(d for d in os.listdir(root) if os.path.isfile(os.path.join(root, d, "SKILL.md")))
     edges = defaultdict(set)
     for n in names:
         text = open(os.path.join(root, n, "SKILL.md"), encoding="utf-8", errors="ignore").read()
         text = re.sub(r"\A---\n.*?\n---\n", "", text, flags=re.S)
+        text = re.sub(r"(?ims)^(#{1,6})\s*(when not to use|see also|related)\b.*?(?=^#{1,6}\s|\Z)", "", text)
         for o in names:
             if o != n and re.search(r"(?<![\w-])" + re.escape(o) + r"(?![\w-])", text):
                 edges[n].add(o)

@@ -25,7 +25,7 @@ Two rules govern the whole review. **Search like a pessimist**: assume defects e
 - Trivial changes (typo fixes, formatting)
 - When the user explicitly says "just ship it"
 - During brainstorming (don't kill ideas before they form)
-- Small code changes (a self-review loop covers these)
+- Small code changes (use `vibe-quality-loop`)
 - The user wants friendly proofreading or reassurance, not critique
 - Prose that reads as machine-written but is otherwise sound (use `vibe-slop-filter`)
 

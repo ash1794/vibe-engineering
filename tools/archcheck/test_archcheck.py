@@ -92,7 +92,8 @@ class SkillsGraph(unittest.TestCase):
             tree(d, {
                 "skill-a/SKILL.md": "---\nname: skill-a\ndescription: Not for B work; use skill-b.\n---\nRun skill-c first.\n",
                 "skill-b/SKILL.md": "---\nname: skill-b\n---\nBody.\n",
-                "skill-c/SKILL.md": "---\nname: skill-c\n---\nSee skill-a-extra, not a skill.\n",
+                "skill-c/SKILL.md": "---\nname: skill-c\n---\nSee skill-a-extra, not a skill.\n"
+                                    "## When NOT to Use This Skill\n- For B work (use skill-b)\n## Steps\nDone.\n",
             })
             nodes, edges = archcheck.skills_graph(d, {})
             self.assertEqual(nodes, {"skill-a", "skill-b", "skill-c"})
